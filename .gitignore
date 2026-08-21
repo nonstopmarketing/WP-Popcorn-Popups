@@ -1,0 +1,14 @@
+# Build artifact — regenerate with Compress-Archive
+popcorn-popups.zip
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.code-workspace
+
+# Dependencies
+node_modules/
+vendor/
