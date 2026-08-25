@@ -76,12 +76,12 @@ class Popcorn_Admin {
 	}
 
 	/**
-	 * Add the scoreboard page under the Popcorn menu.
+	 * Add the scoreboard page under the Popups menu.
 	 */
 	public static function menu() {
 		add_submenu_page(
 			'edit.php?post_type=' . POPCORN_CPT,
-			__( 'Popcorn Scoreboard', 'popcorn-popups' ),
+			__( 'Popups Scoreboard', 'popcorn-popups' ),
 			__( '📊 Scoreboard', 'popcorn-popups' ),
 			'edit_posts',
 			'popcorn-scoreboard',
@@ -231,7 +231,7 @@ class Popcorn_Admin {
 		$total_rate = $tv ? round( ( $tc / $tv ) * 100, 1 ) : 0;
 		?>
 		<div class="wrap pcp-scoreboard">
-			<h1><?php esc_html_e( '📊 Popcorn Scoreboard', 'popcorn-popups' ); ?></h1>
+			<h1><?php esc_html_e( '📊 Popups Scoreboard', 'popcorn-popups' ); ?></h1>
 			<p class="pcp-muted"><?php echo esc_html( self::pep_talk( $tv, $total_rate ) ); ?></p>
 
 			<div class="pcp-bigstats">

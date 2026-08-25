@@ -500,6 +500,51 @@
 	border-radius: 12px;
 }
 
+/* ---------------------------------------------------- Hello Bar admin */
+
+.pcp-hb-preview-wrap {
+	position: relative;
+	max-width: 900px;
+	margin: 18px 0 26px;
+	padding: 30px 14px 14px;
+	background: repeating-linear-gradient(45deg, #f6f7f7, #f6f7f7 10px, #f0f0f1 10px, #f0f0f1 20px);
+	border: 1px solid var(--pcp-line);
+	border-radius: 12px;
+}
+
+.pcp-hb-preview-caption {
+	position: absolute;
+	top: 9px;
+	left: 14px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: #646970;
+}
+
+.pcp-hb-colors {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 18px;
+}
+
+.pcp-hb-colors > span {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+.pcp-hb-colors label {
+	font-size: 12px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.pcp-hellobar-admin .form-table th {
+	width: 180px;
+}
+
 .pcp-welcome p {
 	display: flex;
 	align-items: center;

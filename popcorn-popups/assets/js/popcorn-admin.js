@@ -262,6 +262,38 @@
 			.join( '' );
 	}
 
+	/**
+	 * Mirror of Popcorn_Frontend::confetti_colors() so the preview shows the
+	 * palette you actually picked.
+	 */
+	function confettiColors() {
+		var accent = val( 'accent_color' ) || '#ff5c39';
+
+		var palettes = {
+			popcorn: [ accent, '#ffd166', '#fff3c4', '#ff9f1c', '#ffffff' ],
+			party: [ '#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#f78c6b' ],
+			neon: [ '#39ff14', '#ff073a', '#00e5ff', '#ff00e6', '#faff00' ],
+			gold: [ '#d4af37', '#f6e7b4', '#b8860b', '#fffdf3', '#e8c14f' ],
+			mono: [ '#111111', '#555555', '#999999', '#dddddd', '#ffffff' ],
+			accent: [ accent ]
+		};
+
+		var choice = val( 'confetti_palette' );
+
+		if ( 'custom' === choice ) {
+			var custom = [ val( 'confetti_c1' ), val( 'confetti_c2' ), val( 'confetti_c3' ), val( 'confetti_c4' ) ]
+				.filter( function ( hex ) {
+					return /^#[0-9a-f]{3,8}$/i.test( hex );
+				} );
+
+			if ( custom.length ) {
+				return custom;
+			}
+		}
+
+		return palettes[ choice ] || palettes.popcorn;
+	}
+
 	function previewConfig() {
 		var title = document.getElementById( 'title' );
 		var content = editorContent();
@@ -276,6 +308,7 @@
 			content: content,
 			trigger: val( 'trigger' ),
 			position: val( 'position' ),
+			offset: num( 'corner_offset' ),
 			animation: val( 'animation' ),
 			width: num( 'width' ),
 			radius: num( 'radius' ),
@@ -285,7 +318,9 @@
 			overlay: bool( 'overlay' ),
 			overlayBg: val( 'overlay_color' ),
 			blur: bool( 'overlay_blur' ),
-			confetti: bool( 'confetti' ),
+			confetti: val( 'confetti_when' ),
+			confettiFx: val( 'confetti_style' ),
+			confettiHue: confettiColors(),
 			sound: bool( 'sound' ),
 			emojiRain: val( 'emoji_rain' ),
 			ctaText: val( 'cta_text' ),

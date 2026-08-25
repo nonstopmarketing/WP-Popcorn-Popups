@@ -3,7 +3,7 @@
  * Plugin Name:       Popcorn Popups
  * Plugin URI:        https://example.com/popcorn-popups
  * Description:       🍿 A ridiculously fun popup builder. Pop things up on pages and posts with wild triggers, silly animations, and actual confetti.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            You
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'POPCORN_VERSION', '1.0.0' );
+define( 'POPCORN_VERSION', '1.1.0' );
 define( 'POPCORN_FILE', __FILE__ );
 define( 'POPCORN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'POPCORN_URL', plugin_dir_url( __FILE__ ) );
@@ -31,6 +31,7 @@ require_once POPCORN_DIR . 'includes/class-popcorn-targeting.php';
 require_once POPCORN_DIR . 'includes/class-popcorn-frontend.php';
 require_once POPCORN_DIR . 'includes/class-popcorn-rest.php';
 require_once POPCORN_DIR . 'includes/class-popcorn-shortcode.php';
+require_once POPCORN_DIR . 'includes/class-popcorn-hellobar.php';
 
 /**
  * Boot the whole snack bar.
@@ -42,6 +43,7 @@ function popcorn_boot() {
 	Popcorn_Frontend::init();
 	Popcorn_REST::init();
 	Popcorn_Shortcode::init();
+	Popcorn_Hellobar::init();
 }
 add_action( 'plugins_loaded', 'popcorn_boot' );
 

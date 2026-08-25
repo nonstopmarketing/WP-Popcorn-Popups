@@ -138,8 +138,11 @@ class Popcorn_Frontend {
 			'idle'        => (int) popcorn_get( $id, 'trigger_idle' ),
 			'frequency'   => popcorn_get( $id, 'frequency' ),
 			'freqDays'    => (int) popcorn_get( $id, 'frequency_days' ),
+			'maxShows'    => (int) popcorn_get( $id, 'max_shows' ),
+			'cookieDays'  => (int) popcorn_get( $id, 'cookie_days' ),
 			'closeDelay'  => (int) popcorn_get( $id, 'close_delay' ),
 			'position'    => popcorn_get( $id, 'position' ),
+			'offset'      => (int) popcorn_get( $id, 'corner_offset' ),
 			'animation'   => popcorn_get( $id, 'animation' ),
 			'width'       => (int) popcorn_get( $id, 'width' ),
 			'radius'      => (int) popcorn_get( $id, 'radius' ),
@@ -149,7 +152,9 @@ class Popcorn_Frontend {
 			'overlay'     => (int) popcorn_get( $id, 'overlay' ) ? 1 : 0,
 			'overlayBg'   => popcorn_get( $id, 'overlay_color' ),
 			'blur'        => (int) popcorn_get( $id, 'overlay_blur' ) ? 1 : 0,
-			'confetti'    => (int) popcorn_get( $id, 'confetti' ) ? 1 : 0,
+			'confetti'    => popcorn_get( $id, 'confetti_when' ),
+			'confettiFx'  => popcorn_get( $id, 'confetti_style' ),
+			'confettiHue' => self::confetti_colors( $id ),
 			'sound'       => (int) popcorn_get( $id, 'sound' ) ? 1 : 0,
 			'emojiRain'   => popcorn_get( $id, 'emoji_rain' ),
 			'ctaText'     => popcorn_get( $id, 'cta_text' ),
@@ -166,6 +171,51 @@ class Popcorn_Frontend {
 		 * @param WP_Post $popup  Popup post.
 		 */
 		return apply_filters( 'popcorn_popup_config', $config, $popup );
+	}
+
+	/**
+	 * Resolve the confetti palette into a list of hex colours.
+	 *
+	 * @param int $id Popup ID.
+	 * @return string[]
+	 */
+	public static function confetti_colors( $id ) {
+		$accent = popcorn_get( $id, 'accent_color' );
+
+		$palettes = array(
+			'popcorn' => array( $accent, '#ffd166', '#fff3c4', '#ff9f1c', '#ffffff' ),
+			'party'   => array( '#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#f78c6b' ),
+			'neon'    => array( '#39ff14', '#ff073a', '#00e5ff', '#ff00e6', '#faff00' ),
+			'gold'    => array( '#d4af37', '#f6e7b4', '#b8860b', '#fffdf3', '#e8c14f' ),
+			'mono'    => array( '#111111', '#555555', '#999999', '#dddddd', '#ffffff' ),
+			'accent'  => array( $accent ),
+		);
+
+		$choice = popcorn_get( $id, 'confetti_palette' );
+
+		if ( 'custom' === $choice ) {
+			$custom = array(
+				popcorn_get( $id, 'confetti_c1' ),
+				popcorn_get( $id, 'confetti_c2' ),
+				popcorn_get( $id, 'confetti_c3' ),
+				popcorn_get( $id, 'confetti_c4' ),
+			);
+			$custom = array_values( array_filter( array_map( 'sanitize_hex_color', $custom ) ) );
+
+			if ( ! empty( $custom ) ) {
+				return $custom;
+			}
+		}
+
+		$colors = isset( $palettes[ $choice ] ) ? $palettes[ $choice ] : $palettes['popcorn'];
+
+		/**
+		 * Filter the confetti colours for a popup.
+		 *
+		 * @param string[] $colors Hex colours.
+		 * @param int      $id     Popup ID.
+		 */
+		return apply_filters( 'popcorn_confetti_colors', $colors, $id );
 	}
 
 	/**

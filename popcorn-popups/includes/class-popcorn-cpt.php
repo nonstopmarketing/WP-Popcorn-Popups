@@ -28,7 +28,7 @@ class Popcorn_CPT {
 		$labels = array(
 			'name'                  => __( 'Popups', 'popcorn-popups' ),
 			'singular_name'         => __( 'Popup', 'popcorn-popups' ),
-			'menu_name'             => __( 'Popcorn', 'popcorn-popups' ),
+			'menu_name'             => __( 'Popups', 'popcorn-popups' ),
 			'add_new'               => __( 'Pop a new one', 'popcorn-popups' ),
 			'add_new_item'          => __( 'Add New Popup', 'popcorn-popups' ),
 			'edit_item'             => __( 'Edit Popup', 'popcorn-popups' ),

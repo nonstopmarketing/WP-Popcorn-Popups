@@ -19,15 +19,39 @@ Each popup is its own little post: write the content in the normal editor, then 
 
 ### Design
 
-Eight positions (center, top bar, bottom bar, all four corners, full screen), six entrances (pop, slide, fly, flip, jelly wobble, drop), your own colours, corner roundness, and an optional dimmed and blurred backdrop.
+Eight positions (center, top bar, bottom bar, all four corners, full screen), six entrances (pop, slide, fly, flip, jelly wobble, drop), your own colours, corner roundness, and an optional dimmed and blurred backdrop. Corner popups get a "distance from the corner" control.
 
 ### The fun bits
 
-- 🎉 Canvas confetti when someone clicks the button
+- 🎉 **Confetti**, fired the moment the popup pops, on the button click, or both
 - 🔊 A synthesised "pop" on open — WebAudio, no audio file needed
 - 🌧️ Emoji rain: type `🍿🎉✨` into one field and it rains
 
+Four confetti styles:
+
+| | Style | What it does |
+|---|---|---|
+| 🎊 | Corner cannons | Fires in from both bottom corners, filling the window around the popup |
+| 💥 | Center burst | One big bang, middle out |
+| 🎆 | Fireworks | Several pops in sequence across the window |
+| 🌧️ | Confetti rain | Drifts down the whole page |
+
+Six colour palettes — Popcorn, Party, Neon, Gold, Monochrome, or just your accent colour — plus a custom four-colour picker.
+
 All of it stands down under `prefers-reduced-motion`.
+
+### 👋 Hello Bar
+
+One global, full-width announcement bar across the whole site, under **Popups → 👋 Hello Bar**.
+
+- Top or bottom of the window
+- Stuck to the window while scrolling, or sitting in the normal page flow
+- Emoji, message (basic HTML allowed), button label and link, new tab or not
+- Four colours: bar background, bar text, button background, button text
+- Pushes the page down so it never covers your header
+- Visitors can close it; it stays closed for as many days as you choose
+- Editing the message brings it back for everyone, including people who dismissed the old one
+- Live preview right on the settings screen
 
 ### Targeting — pages and posts
 
@@ -35,13 +59,26 @@ Everywhere · front page only · all pages · all posts · archives, blog index 
 
 Layered on top: an exclusion list that always wins, desktop vs mobile, logged-in vs logged-out, a start and end date, and a priority number so two popups never fight over the same page.
 
-### Frequency capping
+### Frequency capping — cookies
 
-Every page view, once per session, once every *X* days, or once ever. Add a "Maybe later" link and that visitor never sees it again on that device.
+**Pacing:** every page view, once per session, once every *X* days, or once ever.
+
+**Lifetime cap:** *stop after this many pops per visitor*. Set it to 3 and a visitor sees the popup on three site visits and never again, whatever the pacing says. `0` means no cap.
+
+Counted in first-party cookies on the visitor's own device:
+
+| Cookie | Holds |
+|---|---|
+| `pcp_<id>` | How many times they have seen it, and when they last did |
+| `pcp_s_<id>` | Session marker for "once per session" |
+| `pcp_x_<id>` | Set when they click your "Maybe later" link |
+| `pcp_hello_<hash>` | Set when they close the Hello Bar |
+
+*Remember visitors for (days)* controls how long those cookies live. When they expire, the visitor is treated as brand new.
 
 ### Stats
 
-Every popup counts pops, button clicks and dismissals, and works out a click rate. There is a Scoreboard page under the Popcorn menu. Views from users who can edit posts are not counted, so your own testing does not pollute the numbers.
+Every popup counts pops, button clicks and dismissals, and works out a click rate. There is a Scoreboard page under the Popups menu. Views from users who can edit posts are not counted, so your own testing does not pollute the numbers.
 
 ## Install
 
@@ -50,7 +87,7 @@ Download or clone, then either:
 - copy the `popcorn-popups/` folder into `wp-content/plugins/`, or
 - zip that folder and upload it under **Plugins → Add New → Upload Plugin**.
 
-Then activate and head to **Popcorn → Pop a new one**.
+Then activate and head to **Popups → Pop a new one**.
 
 ## Usage
 
@@ -76,6 +113,9 @@ JavaScript API:
 ```js
 Popcorn.open( 12 );
 Popcorn.close( 12 );
+Popcorn.reset( 12 );   // clear this visitor's cookies for one popup
+Popcorn.reset();       // ...or for every popup on the page
+PopcornHello.reset();  // bring the Hello Bar back on this device
 ```
 
 Events fire on the popup element and bubble to `document`:
@@ -94,13 +134,17 @@ PHP filters:
 | `popcorn_popup_qualifies` | Per-popup targeting override |
 | `popcorn_popup_config` | Tweak the JSON handed to the front end |
 | `popcorn_popup_content` | Filter the rendered popup body |
+| `popcorn_confetti_colors` | Change the confetti palette in code |
+| `popcorn_hellobar_visible` | Decide per request whether the Hello Bar shows |
 
 PHP action: `popcorn_tracked`, fired with `( $event, $popup_id, $new_total )`.
 
 ## Notes and limits
 
 - Device targeting is decided in the browser rather than on the server, so a full-page cache can never serve a desktop-only popup to a phone.
-- Frequency capping uses `localStorage` / `sessionStorage`, so it is per-device and per-browser, and clearing site data resets it.
+- Frequency capping and the visitor cap use first-party cookies, so they are per-device and per-browser. Clearing cookies resets the count, and a visitor who blocks cookies sees the popup on every visit.
+- Those cookies are functional rather than tracking cookies — nothing is sent anywhere and no visitor is identified — but if your site shows a cookie notice, this is the sort of thing it should mention.
+- The Hello Bar is printed hidden and revealed by JavaScript, so people who dismissed it never see it flash. That also means it does not appear at all with JavaScript disabled.
 - The tracking endpoint is public and unauthenticated — it has to work for logged-out visitors. The counters are a rough popularity gauge, not audited analytics.
 - One automatic popup shows per page view. Click-triggered popups are exempt, since the visitor asked for those.
 - Uninstalling removes only the plugin's own option. Your popups are content, so they stay in the database.

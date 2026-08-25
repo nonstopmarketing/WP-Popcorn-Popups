@@ -32,30 +32,49 @@
 		return list[ Math.floor( Math.random() * list.length ) ];
 	}
 
-	function store( type ) {
+	/* ------------------------------------------------------------ cookies */
+
+	/**
+	 * Write a first-party cookie. Pass days = 0 for a session cookie, which
+	 * dies when the browser closes.
+	 */
+	function setCookie( name, value, days ) {
+		var bits = [ name + '=' + encodeURIComponent( value ), 'path=/', 'SameSite=Lax' ];
+
+		if ( days > 0 ) {
+			var expires = new Date();
+			expires.setTime( expires.getTime() + days * 86400000 );
+			bits.push( 'expires=' + expires.toUTCString() );
+			bits.push( 'max-age=' + Math.round( days * 86400 ) );
+		}
+
+		if ( 'https:' === window.location.protocol ) {
+			bits.push( 'Secure' );
+		}
+
 		try {
-			var s = 'session' === type ? window.sessionStorage : window.localStorage;
-			s.setItem( '__pcp', '1' );
-			s.removeItem( '__pcp' );
-			return s;
+			document.cookie = bits.join( '; ' );
+		} catch ( e ) {
+			/* Cookies blocked — the popup simply shows again next time. */
+		}
+	}
+
+	function getCookie( name ) {
+		try {
+			var escaped = name.replace( /([.*+?^${}()|[\]\\])/g, '\\$1' );
+			var match = document.cookie.match( new RegExp( '(?:^|; )' + escaped + '=([^;]*)' ) );
+			return match ? decodeURIComponent( match[ 1 ] ) : null;
 		} catch ( e ) {
 			return null;
 		}
 	}
 
-	function readFlag( type, key ) {
-		var s = store( type );
-		return s ? s.getItem( key ) : null;
-	}
-
-	function writeFlag( type, key, value ) {
-		var s = store( type );
-		if ( s ) {
-			try {
-				s.setItem( key, value );
-			} catch ( e ) {
-				/* Storage full or blocked — the popup just shows again. */
-			}
+	function clearCookie( name ) {
+		setCookie( name, '', 0 );
+		try {
+			document.cookie = name + '=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+		} catch ( e ) {
+			/* Nothing to do. */
 		}
 	}
 
@@ -124,13 +143,24 @@
 
 	/* ------------------------------------------------------ party effects */
 
-	function confetti( accent ) {
+	var DEFAULT_CONFETTI = [ '#ff5c39', '#ffd166', '#06d6a0', '#118ab2', '#ffffff' ];
+
+	/**
+	 * Throw confetti across the whole window.
+	 *
+	 * @param {Array}  colors Hex colours to use.
+	 * @param {string} style  cannons | burst | fireworks | rain.
+	 */
+	function confetti( colors, style ) {
 		if ( reducedMotion() ) {
 			return;
 		}
 
+		colors = ( colors && colors.length ) ? colors : DEFAULT_CONFETTI;
+		style = style || 'cannons';
+
 		var canvas = el( 'canvas', 'popcorn-confetti' );
-		var dpr = window.devicePixelRatio || 1;
+		var dpr = Math.min( window.devicePixelRatio || 1, 2 );
 		var w = window.innerWidth;
 		var h = window.innerHeight;
 
@@ -138,26 +168,104 @@
 		canvas.height = h * dpr;
 		canvas.style.width = w + 'px';
 		canvas.style.height = h + 'px';
+		canvas.setAttribute( 'aria-hidden', 'true' );
 		document.body.appendChild( canvas );
 
 		var ctx = canvas.getContext( '2d' );
 		ctx.scale( dpr, dpr );
 
-		var colors = [ accent, '#ffd166', '#06d6a0', '#118ab2', '#ef476f', '#ffffff' ];
 		var bits = [];
-		var i;
+		var lifetime = 'rain' === style ? 5200 : 3200;
 
-		for ( i = 0; i < 140; i++ ) {
-			bits.push( {
-				x: w / 2 + ( Math.random() - 0.5 ) * w * 0.5,
-				y: h * 0.55 + ( Math.random() - 0.5 ) * 60,
-				vx: ( Math.random() - 0.5 ) * 14,
-				vy: -( 8 + Math.random() * 14 ),
-				size: 5 + Math.random() * 7,
-				color: colors[ i % colors.length ],
-				spin: ( Math.random() - 0.5 ) * 0.4,
-				angle: Math.random() * Math.PI
-			} );
+		/**
+		 * Throw `count` pieces from one point.
+		 *
+		 * @param {number} x      Origin x.
+		 * @param {number} y      Origin y.
+		 * @param {number} count  How many pieces.
+		 * @param {number} aim    Direction in radians (-PI/2 is straight up).
+		 * @param {number} spread How wide the cone is, in radians.
+		 * @param {number} power  Launch speed.
+		 */
+		function emit( x, y, count, aim, spread, power ) {
+			for ( var i = 0; i < count; i++ ) {
+				var angle = aim + ( Math.random() - 0.5 ) * spread;
+				var speed = power * ( 0.55 + Math.random() * 0.65 );
+
+				bits.push( {
+					x: x,
+					y: y,
+					vx: Math.cos( angle ) * speed,
+					vy: Math.sin( angle ) * speed,
+					size: 5 + Math.random() * 8,
+					color: colors[ Math.floor( Math.random() * colors.length ) ],
+					spin: ( Math.random() - 0.5 ) * 0.4,
+					angle: Math.random() * Math.PI,
+					round: Math.random() < 0.25,
+					gravity: 0.42,
+					drag: 0.995,
+					sway: 0,
+					born: 0
+				} );
+			}
+		}
+
+		/**
+		 * Gentle drifting pieces that start above the top edge.
+		 */
+		function seedRain( count ) {
+			for ( var i = 0; i < count; i++ ) {
+				bits.push( {
+					x: Math.random() * w,
+					y: -20 - Math.random() * h * 0.7,
+					vx: ( Math.random() - 0.5 ) * 1.6,
+					vy: 2 + Math.random() * 3.5,
+					size: 6 + Math.random() * 8,
+					color: colors[ Math.floor( Math.random() * colors.length ) ],
+					spin: ( Math.random() - 0.5 ) * 0.3,
+					angle: Math.random() * Math.PI,
+					round: Math.random() < 0.25,
+					gravity: 0.015,
+					drag: 1,
+					sway: 0.6 + Math.random() * 1.4,
+					born: Math.random() * Math.PI * 2
+				} );
+			}
+		}
+
+		var scheduled = [];
+
+		switch ( style ) {
+			case 'burst':
+				emit( w / 2, h * 0.48, 190, -Math.PI / 2, Math.PI * 2, 17 );
+				break;
+
+			case 'fireworks':
+				emit( w * 0.5, h * 0.35, 70, -Math.PI / 2, Math.PI * 2, 14 );
+				[
+					[ 0.22, 0.28, 260 ],
+					[ 0.78, 0.32, 480 ],
+					[ 0.38, 0.6, 720 ],
+					[ 0.68, 0.55, 980 ]
+				].forEach( function ( spot ) {
+					scheduled.push( window.setTimeout( function () {
+						emit( w * spot[ 0 ], h * spot[ 1 ], 60, -Math.PI / 2, Math.PI * 2, 13 );
+					}, spot[ 2 ] ) );
+				} );
+				lifetime = 4200;
+				break;
+
+			case 'rain':
+				seedRain( 190 );
+				break;
+
+			case 'cannons':
+			default:
+				// Two cannons in the bottom corners, aimed up and inwards, so the
+				// confetti fills the window around whatever is on screen.
+				emit( 0, h, 110, -Math.PI / 3, 0.9, 24 );
+				emit( w, h, 110, -Math.PI + Math.PI / 3, 0.9, 24 );
+				break;
 		}
 
 		var start = null;
@@ -166,29 +274,49 @@
 			if ( null === start ) {
 				start = time;
 			}
+
 			var elapsed = time - start;
+			var fade = Math.max( 0, 1 - Math.max( 0, elapsed - lifetime * 0.55 ) / ( lifetime * 0.45 ) );
+
 			ctx.clearRect( 0, 0, w, h );
 
-			bits.forEach( function ( b ) {
-				b.vy += 0.42;
-				b.vx *= 0.995;
-				b.x += b.vx;
+			for ( var i = 0; i < bits.length; i++ ) {
+				var b = bits[ i ];
+
+				b.vy += b.gravity;
+				b.vx *= b.drag;
+				b.x += b.vx + ( b.sway ? Math.sin( ( elapsed / 400 ) + b.born ) * b.sway : 0 );
 				b.y += b.vy;
 				b.angle += b.spin;
+
+				if ( b.y > h + 40 ) {
+					continue;
+				}
 
 				ctx.save();
 				ctx.translate( b.x, b.y );
 				ctx.rotate( b.angle );
-				ctx.globalAlpha = Math.max( 0, 1 - elapsed / 2600 );
+				ctx.globalAlpha = fade;
 				ctx.fillStyle = b.color;
-				ctx.fillRect( -b.size / 2, -b.size / 2, b.size, b.size * 0.6 );
-				ctx.restore();
-			} );
 
-			if ( elapsed < 2600 ) {
+				if ( b.round ) {
+					ctx.beginPath();
+					ctx.arc( 0, 0, b.size / 2, 0, Math.PI * 2 );
+					ctx.fill();
+				} else {
+					ctx.fillRect( -b.size / 2, -b.size / 2, b.size, b.size * 0.62 );
+				}
+
+				ctx.restore();
+			}
+
+			if ( elapsed < lifetime ) {
 				window.requestAnimationFrame( frame );
-			} else if ( canvas.parentNode ) {
-				canvas.parentNode.removeChild( canvas );
+			} else {
+				scheduled.forEach( window.clearTimeout );
+				if ( canvas.parentNode ) {
+					canvas.parentNode.removeChild( canvas );
+				}
 			}
 		}
 
@@ -294,6 +422,7 @@
 		root.style.setProperty( '--pcp-overlay', hexToRgba( c.overlayBg, 0.62 ) );
 		root.style.setProperty( '--pcp-radius', ( c.radius || 0 ) + 'px' );
 		root.style.setProperty( '--pcp-width', ( c.width || 480 ) + 'px' );
+		root.style.setProperty( '--pcp-offset', ( undefined === c.offset ? 20 : c.offset ) + 'px' );
 
 		var overlay = el( 'div', 'popcorn__overlay' );
 		var box = el( 'div', 'popcorn__box' );
@@ -365,6 +494,32 @@
 	};
 
 	/**
+	 * Cookie names for this popup: the counter, the session marker, and the
+	 * permanent "no thanks".
+	 */
+	Popup.prototype.cookieNames = function () {
+		return {
+			count: 'pcp_' + this.id,
+			session: 'pcp_s_' + this.id,
+			dismissed: 'pcp_x_' + this.id
+		};
+	};
+
+	/**
+	 * What the counter cookie knows about this visitor:
+	 * how many times they have seen it, and when they last did.
+	 */
+	Popup.prototype.record = function () {
+		var raw = getCookie( this.cookieNames().count ) || '';
+		var parts = raw.split( '-' );
+
+		return {
+			count: parseInt( parts[ 0 ], 10 ) || 0,
+			last: parseInt( parts[ 1 ], 10 ) || 0
+		};
+	};
+
+	/**
 	 * Has this visitor already had their fill of this popup?
 	 */
 	Popup.prototype.alreadySeen = function () {
@@ -372,52 +527,75 @@
 			return false;
 		}
 
-		if ( readFlag( 'local', 'popcorn_dismissed_' + this.id ) ) {
+		var names = this.cookieNames();
+
+		if ( getCookie( names.dismissed ) ) {
 			return true;
 		}
 
-		var key = 'popcorn_seen_' + this.id;
+		var seen = this.record();
+		var cap = parseInt( this.config.maxShows, 10 ) || 0;
+
+		// The lifetime cap wins over everything below it.
+		if ( cap > 0 && seen.count >= cap ) {
+			return true;
+		}
 
 		switch ( this.config.frequency ) {
 			case 'always':
 				return false;
 
 			case 'session':
-				return !! readFlag( 'session', key );
+				return !! getCookie( names.session );
 
 			case 'once':
-				return !! readFlag( 'local', key );
+				return seen.count > 0;
 
 			case 'days':
-				var stamp = parseInt( readFlag( 'local', key ), 10 );
-				if ( ! stamp ) {
+				if ( ! seen.last ) {
 					return false;
 				}
 				var days = Math.max( 1, this.config.freqDays || 7 );
-				return ( Date.now() - stamp ) < days * 86400000;
+				return ( Date.now() - seen.last ) < days * 86400000;
 
 			default:
 				return false;
 		}
 	};
 
+	/**
+	 * Count this impression. Runs for every frequency setting, so the lifetime
+	 * cap keeps working even on "every single page view".
+	 */
 	Popup.prototype.remember = function ( forever ) {
 		if ( this.isPreview ) {
 			return;
 		}
 
+		var names = this.cookieNames();
+		var days = Math.max( 1, parseInt( this.config.cookieDays, 10 ) || 365 );
+
 		if ( forever ) {
-			writeFlag( 'local', 'popcorn_dismissed_' + this.id, '1' );
+			setCookie( names.dismissed, '1', days );
 			return;
 		}
 
-		var key = 'popcorn_seen_' + this.id;
+		var seen = this.record();
+		setCookie( names.count, ( seen.count + 1 ) + '-' + Date.now(), days );
 
 		if ( 'session' === this.config.frequency ) {
-			writeFlag( 'session', key, '1' );
-		} else if ( 'once' === this.config.frequency || 'days' === this.config.frequency ) {
-			writeFlag( 'local', key, String( Date.now() ) );
+			setCookie( names.session, '1', 0 );
 		}
+	};
+
+	/**
+	 * Forget this visitor entirely — handy while testing.
+	 */
+	Popup.prototype.forget = function () {
+		var names = this.cookieNames();
+		clearCookie( names.count );
+		clearCookie( names.session );
+		clearCookie( names.dismissed );
 	};
 
 	/**
@@ -626,6 +804,9 @@
 		if ( c.emojiRain ) {
 			emojiRain( c.emojiRain );
 		}
+		if ( this.wantsConfetti( 'open' ) ) {
+			this.fireConfetti();
+		}
 
 		this.remember( false );
 		track( this.id, 'view' );
@@ -688,14 +869,34 @@
 		}
 	};
 
+	/**
+	 * Should confetti fly at this moment? `moment` is 'open' or 'click'.
+	 */
+	Popup.prototype.wantsConfetti = function ( moment ) {
+		var when = this.config.confetti;
+
+		// Older popups stored this as a plain on/off toggle for the button.
+		if ( 1 === when || '1' === when || true === when ) {
+			when = 'click';
+		}
+
+		return when === moment || 'both' === when;
+	};
+
+	Popup.prototype.fireConfetti = function () {
+		confetti( this.config.confettiHue, this.config.confettiFx );
+	};
+
 	Popup.prototype.onCta = function ( event ) {
 		var self = this;
 		var c = this.config;
 
 		track( this.id, 'click' );
 
-		if ( c.confetti ) {
-			confetti( c.accent );
+		var partying = this.wantsConfetti( 'click' );
+
+		if ( partying ) {
+			this.fireConfetti();
 		}
 
 		if ( ! c.ctaUrl ) {
@@ -711,7 +912,7 @@
 			return;
 		}
 
-		if ( c.confetti && ! reducedMotion() ) {
+		if ( partying && ! reducedMotion() ) {
 			// Hold the navigation just long enough to enjoy the confetti.
 			event.preventDefault();
 			var href = c.ctaUrl;
@@ -768,6 +969,22 @@
 		close: function ( id ) {
 			if ( instances[ id ] ) {
 				instances[ id ].hide( 'close' );
+			}
+		},
+
+		/**
+		 * Clear this visitor's cookies for a popup, so it can pop again.
+		 * Pass no id to reset every popup on the page.
+		 */
+		reset: function ( id ) {
+			if ( undefined === id ) {
+				Object.keys( instances ).forEach( function ( key ) {
+					instances[ key ].forget();
+				} );
+				return;
+			}
+			if ( instances[ id ] ) {
+				instances[ id ].forget();
 			}
 		},
 

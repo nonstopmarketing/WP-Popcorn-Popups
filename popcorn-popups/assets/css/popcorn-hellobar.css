@@ -1,0 +1,196 @@
+/**
+ * Popcorn Popups — the global Hello Bar.
+ */
+
+.popcorn-hello {
+	--pcp-hb-bg: #1f1a17;
+	--pcp-hb-text: #fffaf0;
+	--pcp-hb-btn: #ff5c39;
+	--pcp-hb-btn-ink: #ffffff;
+
+	position: relative;
+	z-index: 999980;
+	box-sizing: border-box;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 12px 48px;
+	font-size: 15px;
+	line-height: 1.4;
+	color: var(--pcp-hb-text);
+	background: var(--pcp-hb-bg);
+	box-shadow: 0 2px 14px -4px rgba(0, 0, 0, 0.35);
+}
+
+.popcorn-hello[hidden] {
+	display: none;
+}
+
+/* Stuck to the window. */
+
+.popcorn-hello--stuck {
+	position: fixed;
+	left: 0;
+	right: 0;
+}
+
+.popcorn-hello--stuck.popcorn-hello--top {
+	top: 0;
+}
+
+.popcorn-hello--stuck.popcorn-hello--bottom {
+	bottom: 0;
+	box-shadow: 0 -2px 14px -4px rgba(0, 0, 0, 0.35);
+}
+
+/* Keep clear of the WordPress admin bar for logged-in users. */
+
+body.admin-bar .popcorn-hello--stuck.popcorn-hello--top {
+	top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+	body.admin-bar .popcorn-hello--stuck.popcorn-hello--top {
+		top: 46px;
+	}
+}
+
+/* In the flow rather than floating. */
+
+.popcorn-hello--inline {
+	position: relative;
+}
+
+/* --------------------------------------------------------------- Bits */
+
+.popcorn-hello__inner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 8px 14px;
+	max-width: 1100px;
+	text-align: center;
+}
+
+.popcorn-hello__emoji {
+	font-size: 20px;
+	line-height: 1;
+}
+
+.popcorn-hello__msg {
+	margin: 0;
+}
+
+.popcorn-hello__msg p {
+	margin: 0;
+	display: inline;
+}
+
+.popcorn-hello__msg a {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.popcorn-hello__cta {
+	display: inline-block;
+	flex: 0 0 auto;
+	padding: 8px 18px;
+	font-size: 0.9375em;
+	font-weight: 700;
+	line-height: 1.2;
+	text-decoration: none;
+	white-space: nowrap;
+	color: var(--pcp-hb-btn-ink);
+	background: var(--pcp-hb-btn);
+	border-radius: 999px;
+	transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+a.popcorn-hello__cta:hover,
+a.popcorn-hello__cta:focus-visible {
+	color: var(--pcp-hb-btn-ink);
+	transform: translateY(-1px);
+	filter: brightness(1.08);
+}
+
+.popcorn-hello__x {
+	position: absolute;
+	top: 50%;
+	right: 8px;
+	transform: translateY(-50%);
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	font-size: 22px;
+	line-height: 1;
+	color: inherit;
+	background: transparent;
+	border: 0;
+	border-radius: 50%;
+	opacity: 0.6;
+	cursor: pointer;
+	transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.popcorn-hello__x:hover,
+.popcorn-hello__x:focus-visible {
+	opacity: 1;
+	background: rgba(127, 127, 127, 0.25);
+}
+
+/* ---------------------------------------------------------- Going away */
+
+.popcorn-hello.is-leaving {
+	transition: opacity 0.25s ease, transform 0.25s ease;
+	opacity: 0;
+}
+
+.popcorn-hello--top.is-leaving {
+	transform: translateY(-100%);
+}
+
+.popcorn-hello--bottom.is-leaving {
+	transform: translateY(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.popcorn-hello.is-leaving {
+		transition: opacity 0.15s ease;
+		transform: none;
+	}
+}
+
+/* -------------------------------------------------------- Small screens */
+
+@media (max-width: 600px) {
+	.popcorn-hello {
+		padding: 10px 40px;
+		font-size: 14px;
+	}
+
+	.popcorn-hello__inner {
+		gap: 6px 10px;
+	}
+
+	.popcorn-hello__cta {
+		padding: 7px 14px;
+	}
+}
+
+/* ------------------------------------------------- Admin preview only */
+
+.popcorn-hello--preview {
+	position: relative;
+	border-radius: 8px;
+	box-shadow: none;
+}
+
+.popcorn-hello--preview .popcorn-hello__x {
+	cursor: default;
+}
