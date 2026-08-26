@@ -427,6 +427,14 @@
 		root.style.setProperty( '--pcp-width', ( c.width || 480 ) + 'px' );
 		root.style.setProperty( '--pcp-offset', ( undefined === c.offset ? 20 : c.offset ) + 'px' );
 
+		// Border: "none" keeps the width at zero so nothing reserves space.
+		var borderStyle = c.borderStyle && 'none' !== c.borderStyle ? c.borderStyle : 'none';
+		root.style.setProperty( '--pcp-border-style', borderStyle );
+		root.style.setProperty( '--pcp-border-width', ( 'none' === borderStyle ? 0 : ( c.borderWidth || 0 ) ) + 'px' );
+		root.style.setProperty( '--pcp-border-color', c.borderColor || 'transparent' );
+
+		root.classList.add( 'popcorn--shadow-' + ( c.shadow || 'soft' ) );
+
 		var overlay = el( 'div', 'popcorn__overlay' );
 		var box = el( 'div', 'popcorn__box' );
 

@@ -21,6 +21,8 @@ Each popup is its own little post: write the content in the normal editor, then 
 
 Eight positions (center, top bar, bottom bar, all four corners, full screen), six entrances (pop, slide, fly, flip, jelly wobble, drop), your own colours, corner roundness, and an optional dimmed and blurred backdrop. Corner popups get a "distance from the corner" control.
 
+**Borders** are yours to set — none, solid, dashed, dotted or double, with your own thickness and colour. **Drop shadow** is a separate control: none, soft, medium or dramatic.
+
 Two frames:
 
 | | Frame | What you get |

@@ -4,7 +4,7 @@ Tags: popup, modal, popups, lightbox, call to action
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,8 @@ Popcorn Popups adds a **Popups** menu to wp-admin where each popup is its own li
 **Design**
 
 Eight positions (center, top/bottom bar, all four corners, full screen), six entrances (pop, slide, fly, flip, jelly wobble, drop), your own colours, corner roundness, optional dimmed and blurred backdrop.
+
+Borders are yours to set: none, solid, dashed, dotted or double, with your own thickness and colour. Drop shadow is a separate control — none, soft, medium or dramatic.
 
 Two frames:
 
@@ -136,6 +138,15 @@ PHP action:
 * Respects `prefers-reduced-motion`: animations become a simple fade and the confetti and emoji rain sit it out.
 
 == Changelog ==
+
+= 1.3.0 =
+* New border controls: none, solid, dashed, dotted or double, with your own thickness and colour.
+* New drop shadow control: none, soft, medium or dramatic.
+* Fixed: a faint hairline was baked into every popup's shadow, so a card always looked like it had a 1px border you could not turn off. Gone — borders are now entirely your call.
+* Fixed: themes that style `button:hover` with a border were bleeding into the popup's close and call-to-action buttons, making a border appear on rollover. The buttons now hold their own styling through hover, focus and active.
+* Fixed: images inside popup content no longer pick up theme hover borders.
+* The scrollbar on a popup taller than the window is now styled deliberately rather than fading in as a stray native line.
+* The popup box no longer paints a focus ring around itself when it takes focus on open. Keyboard users still get a clear ring on the buttons.
 
 = 1.2.0 =
 * Fixed: a popup set to "every single page view" could stop showing for good. Cookie names are now stamped with the popup's frequency settings, so an old "seen it" or "no thanks" cookie can no longer outlive the setting that created it.

@@ -69,10 +69,65 @@
 	padding: 32px;
 	background: var(--pcp-bg);
 	color: var(--pcp-text);
+	border: var(--pcp-border-width, 0) var(--pcp-border-style, none) var(--pcp-border-color, transparent);
 	border-radius: var(--pcp-radius);
-	box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.04);
+	box-shadow: var(--pcp-shadow, 0 24px 60px -12px rgba(0, 0, 0, 0.35));
 	opacity: 0;
 	-webkit-font-smoothing: antialiased;
+}
+
+/*
+ * The box is focused programmatically when the popup opens so screen readers
+ * land inside it. That must not paint a focus ring around the whole popup —
+ * keyboard users still get rings on the buttons, which are what they tab to.
+ */
+.popcorn__box:focus {
+	outline: none;
+}
+
+/*
+ * When the content is taller than the box it scrolls, and the browser's own
+ * scrollbar fades in on hover — which reads as a stray line down the edge.
+ * Style it so it looks intentional instead.
+ */
+.popcorn__box {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(127, 127, 127, 0.45) transparent;
+}
+
+.popcorn__box::-webkit-scrollbar {
+	width: 8px;
+}
+
+.popcorn__box::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.popcorn__box::-webkit-scrollbar-thumb {
+	background: rgba(127, 127, 127, 0.45);
+	border-radius: 999px;
+}
+
+.popcorn__box::-webkit-scrollbar-thumb:hover {
+	background: rgba(127, 127, 127, 0.7);
+}
+
+/* ---------------------------------------------------------- Shadows */
+
+.popcorn--shadow-none .popcorn__box {
+	--pcp-shadow: none;
+}
+
+.popcorn--shadow-soft .popcorn__box {
+	--pcp-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.35);
+}
+
+.popcorn--shadow-medium .popcorn__box {
+	--pcp-shadow: 0 26px 50px -8px rgba(0, 0, 0, 0.5);
+}
+
+.popcorn--shadow-dramatic .popcorn__box {
+	--pcp-shadow: 0 40px 80px -10px rgba(0, 0, 0, 0.7);
 }
 
 .popcorn.is-open .popcorn__box {
@@ -93,7 +148,6 @@
 	margin: 0;
 	padding: 0;
 	background: transparent;
-	border: 0;
 	border-radius: 0;
 	box-shadow: none;
 	overflow: visible;
@@ -330,6 +384,49 @@
 		from { opacity: 0; }
 		to { opacity: 1; }
 	}
+}
+
+/* ------------------------------------------------- Theme insulation */
+
+/*
+ * Themes love styling `button` and `a` on hover and focus, often with a
+ * border that appears out of nowhere on rollover. These rules are scoped and
+ * specific enough to win, and they cover the hover/focus/active states that a
+ * plain `border: 0` on the base rule leaves open.
+ */
+.popcorn .popcorn__close,
+.popcorn .popcorn__cta,
+.popcorn .popcorn__dismiss,
+.popcorn .popcorn__close:hover,
+.popcorn .popcorn__cta:hover,
+.popcorn .popcorn__dismiss:hover,
+.popcorn .popcorn__close:focus,
+.popcorn .popcorn__cta:focus,
+.popcorn .popcorn__dismiss:focus,
+.popcorn .popcorn__close:active,
+.popcorn .popcorn__cta:active,
+.popcorn .popcorn__dismiss:active {
+	border: 0;
+	outline: none;
+	text-shadow: none;
+}
+
+/* Keyboard users still get a clear, deliberate ring. */
+.popcorn .popcorn__close:focus-visible,
+.popcorn .popcorn__cta:focus-visible,
+.popcorn .popcorn__dismiss:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}
+
+/* Content the author dropped in should not pick up theme hover borders either. */
+.popcorn__content img,
+.popcorn__content a img,
+.popcorn__content a:hover img,
+.popcorn__content a:focus img {
+	border: 0;
+	box-shadow: none;
+	outline: none;
 }
 
 /* ----------------------------------------------------------- Close */
