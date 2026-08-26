@@ -4,7 +4,7 @@ Tags: popup, modal, popups, lightbox, call to action
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -136,6 +136,42 @@ PHP action:
 
 * `popcorn_tracked` — fires with `( $event, $popup_id, $new_total )`
 
+== Security ==
+
+How the plugin handles the usual risks, so you can check the claims rather than take them on trust.
+
+**Who can do what**
+
+* Building popups needs the same capability as writing posts. Popup content goes through WordPress's own filtering, so contributors and authors cannot put scripts in one — same rule as a post.
+* The Spotlight Bar needs `manage_options`, because it appears on every page of the site.
+* The Scoreboard needs `edit_posts`.
+
+**Requests**
+
+* Saving a popup checks a nonce and `edit_post` for that specific popup.
+* The Spotlight Bar settings go through the WordPress Settings API, which brings its own nonce and capability check, and everything is run through a sanitize callback before it is stored.
+* The page/post search behind the targeting picker checks a nonce, checks `edit_posts`, and then checks `read_post` for each result, so it never names a draft or private post back to somebody who is not allowed to see it.
+
+**The tracking endpoint**
+
+`POST popcorn/v1/track` has to stay open to logged-out visitors, so anyone can call it. It only accepts a popup ID and one of three event names, it refuses anything that is not a published popup, and it is rate limited to 60 events per minute per IP address. The address is hashed with your site's salt before it is used as a cache key, so no raw IP is stored. Behind a proxy or CDN that does not restore the visitor's real IP, all traffic looks like one address, so raise or disable the limit with the `popcorn_track_rate_limit` filter:
+
+`add_filter( 'popcorn_track_rate_limit', function () { return 0; } ); // no limit`
+
+The worst a determined caller can do is make the numbers on the Scoreboard wrong.
+
+**Output**
+
+* The popup payload is JSON encoded with angle brackets escaped, so nothing in a popup can close the script tag it travels in.
+* Settings that are meant to be plain text — button labels, the dismiss link, the emoji rain — are written to the page as text, never as markup, on top of being sanitized when saved.
+* The Spotlight Bar's custom HTML is filtered with the same rules WordPress uses for post content: formatting, links and images are kept, scripts and event handlers are stripped. Widen it with `popcorn_spotlight_allowed_html` if you must, and know what you are letting in.
+* Colours are re-validated as hex on the way out, not just on the way in.
+
+**Data**
+
+* No personal data is collected, stored or sent anywhere. The cookies hold a count and a timestamp.
+* Uninstalling removes the plugin's own options. Your popups are content, so they stay.
+
 == Notes and limits ==
 
 * Device targeting is decided in the browser rather than on the server, so a full-page cache can never serve a desktop-only popup to a phone.
@@ -147,6 +183,14 @@ PHP action:
 * Respects `prefers-reduced-motion`: animations become a simple fade and the confetti and emoji rain sit it out.
 
 == Changelog ==
+
+= 1.4.1 =
+* Security: the public tracking endpoint is now rate limited per IP address, so it cannot be used to flood the database with writes. Adjustable with the `popcorn_track_rate_limit` filter.
+* Security: the targeting picker's search now checks read permission on every result, instead of returning draft and private titles to anyone who can edit posts.
+* Hardening: the popup payload is JSON encoded with angle brackets escaped, so popup content can never close the script tag it is embedded in.
+* Hardening: plain-text settings are written to the page as text rather than markup.
+* Hardening: an invalid CSS selector in the click trigger is now detected once and ignored, instead of throwing on every click on the page.
+* Added directory index files and a documented Security section to this readme.
 
 = 1.4.0 =
 * The Hello Bar is now the **Spotlight Bar**. Your existing settings carry over automatically.

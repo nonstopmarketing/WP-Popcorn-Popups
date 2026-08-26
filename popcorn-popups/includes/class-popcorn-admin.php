@@ -365,6 +365,12 @@ class Popcorn_Admin {
 
 		$results = array();
 		foreach ( $found as $item ) {
+			// The search covers drafts and private posts, so check this user is
+			// actually allowed to see each one before naming it back to them.
+			if ( ! current_user_can( 'read_post', $item->ID ) ) {
+				continue;
+			}
+
 			$obj       = get_post_type_object( $item->post_type );
 			$results[] = array(
 				'id'    => $item->ID,

@@ -711,12 +711,15 @@ class Popcorn_Spotlight {
 			$stuck ? 'popcorn-spotlight--stuck' : 'popcorn-spotlight--inline',
 		);
 
+		// Re-run through sanitize_hex_color rather than trusting what is stored:
+		// a value written straight to the option by other code still cannot
+		// break out of the attribute.
 		$style = sprintf(
 			'--pcp-sb-bg:%1$s;--pcp-sb-text:%2$s;--pcp-sb-btn:%3$s;--pcp-sb-btn-ink:%4$s;',
-			esc_attr( $s['bg_color'] ),
-			esc_attr( $s['text_color'] ),
-			esc_attr( $s['btn_bg'] ),
-			esc_attr( $s['btn_text'] )
+			sanitize_hex_color( $s['bg_color'] ),
+			sanitize_hex_color( $s['text_color'] ),
+			sanitize_hex_color( $s['btn_bg'] ),
+			sanitize_hex_color( $s['btn_text'] )
 		);
 		?>
 		<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>"

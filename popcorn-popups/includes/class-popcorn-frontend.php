@@ -112,9 +112,15 @@ class Popcorn_Frontend {
 			$data['popups'][] = self::config( $popup );
 		}
 
+		/*
+		 * JSON_HEX_TAG escapes every angle bracket, so no popup's content can
+		 * close this script tag or open an HTML comment, whatever markup the
+		 * author put in the editor. JavaScript turns the escapes back into
+		 * brackets when it parses the string, so the popup renders as written.
+		 */
 		printf(
 			'<script id="popcorn-data">window.PopcornData = %s;</script>',
-			wp_json_encode( $data )
+			wp_json_encode( $data, JSON_HEX_TAG | JSON_HEX_AMP )
 		);
 	}
 

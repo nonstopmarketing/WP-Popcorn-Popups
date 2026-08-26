@@ -17,6 +17,10 @@
 
 	/* ------------------------------------------------------------ helpers */
 
+	/**
+	 * Element whose contents are HTML. Only use this where markup is the point
+	 * — the popup body, which the author wrote in the editor.
+	 */
 	function el( tag, className, html ) {
 		var node = document.createElement( tag );
 		if ( className ) {
@@ -24,6 +28,22 @@
 		}
 		if ( undefined !== html && null !== html ) {
 			node.innerHTML = html;
+		}
+		return node;
+	}
+
+	/**
+	 * Element whose contents are plain text. Anything coming from a settings
+	 * field goes through here, so markup in one can never become markup on the
+	 * page even if it survived sanitizing on the way in.
+	 */
+	function textEl( tag, className, text ) {
+		var node = document.createElement( tag );
+		if ( className ) {
+			node.className = className;
+		}
+		if ( undefined !== text && null !== text ) {
+			node.textContent = text;
 		}
 		return node;
 	}
@@ -336,7 +356,7 @@
 		document.body.appendChild( layer );
 
 		for ( var i = 0; i < 26; i++ ) {
-			var bit = el( 'span', 'popcorn-rain__bit', pick( chars ) );
+			var bit = textEl( 'span', 'popcorn-rain__bit', pick( chars ) );
 			bit.style.left = Math.random() * 100 + 'vw';
 			bit.style.fontSize = 20 + Math.random() * 26 + 'px';
 			bit.style.animationDuration = 2.6 + Math.random() * 2.6 + 's';
@@ -461,14 +481,14 @@
 			if ( c.ctaText ) {
 				var cta;
 				if ( c.ctaUrl ) {
-					cta = el( 'a', 'popcorn__cta', c.ctaText );
+					cta = textEl( 'a', 'popcorn__cta', c.ctaText );
 					cta.href = c.ctaUrl;
 					if ( c.ctaNewTab ) {
 						cta.target = '_blank';
 						cta.rel = 'noopener noreferrer';
 					}
 				} else {
-					cta = el( 'button', 'popcorn__cta', c.ctaText );
+					cta = textEl( 'button', 'popcorn__cta', c.ctaText );
 					cta.type = 'button';
 				}
 				cta.addEventListener( 'click', function ( event ) {
@@ -478,7 +498,7 @@
 			}
 
 			if ( c.dismissText ) {
-				var dismiss = el( 'button', 'popcorn__dismiss', c.dismissText );
+				var dismiss = textEl( 'button', 'popcorn__dismiss', c.dismissText );
 				dismiss.type = 'button';
 				dismiss.addEventListener( 'click', function () {
 					self.remember( true );
@@ -662,13 +682,26 @@
 		// the visitor is asking for it on purpose.
 		if ( 'click' === c.trigger ) {
 			if ( c.selector ) {
-				document.addEventListener( 'click', function ( event ) {
-					var target = event.target.closest ? event.target.closest( c.selector ) : null;
-					if ( target ) {
-						event.preventDefault();
-						self.show();
-					}
-				} );
+				// A typo in the selector box would otherwise throw on every
+				// click anywhere on the page and take other scripts down with
+				// it. Check it once, up front, and ignore it if it is invalid.
+				var usable = true;
+
+				try {
+					document.querySelector( c.selector );
+				} catch ( e ) {
+					usable = false;
+				}
+
+				if ( usable ) {
+					document.addEventListener( 'click', function ( event ) {
+						var target = event.target.closest ? event.target.closest( c.selector ) : null;
+						if ( target ) {
+							event.preventDefault();
+							self.show();
+						}
+					} );
+				}
 			}
 			return;
 		}

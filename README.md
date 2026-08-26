@@ -175,6 +175,47 @@ PHP filters:
 
 PHP action: `popcorn_tracked`, fired with `( $event, $popup_id, $new_total )`.
 
+## Security
+
+How the plugin handles the usual risks, so you can check the claims rather than take them on trust.
+
+**Who can do what**
+
+| Action | Requires |
+|---|---|
+| Build a popup | Same capability as writing a post — and popup content is filtered by WordPress, so contributors and authors cannot inject scripts |
+| Edit the Spotlight Bar | `manage_options`, since it shows on every page |
+| View the Scoreboard | `edit_posts` |
+
+**Requests**
+
+- Saving a popup checks a nonce and `edit_post` for that specific popup.
+- Spotlight Bar settings go through the Settings API — its own nonce and capability check — with a sanitize callback before anything is stored.
+- The targeting picker's search checks a nonce, checks `edit_posts`, then checks `read_post` **per result**, so it never names a draft or private post back to someone not allowed to see it.
+
+**The tracking endpoint**
+
+`POST popcorn/v1/track` must stay open to logged-out visitors, so anyone can call it. It accepts only a popup ID and one of three event names, refuses anything that is not a published popup, and is rate limited to 60 events per minute per IP. The address is hashed with the site salt before use as a cache key — no raw IP is stored.
+
+Behind a proxy or CDN that doesn't restore the real visitor IP, all traffic looks like one address. Raise or disable the limit:
+
+```php
+add_filter( 'popcorn_track_rate_limit', function () { return 0; } ); // no limit
+```
+
+The worst a determined caller achieves is wrong numbers on the Scoreboard.
+
+**Output**
+
+- The popup payload is JSON encoded with angle brackets escaped, so nothing in a popup can close the script tag it travels in.
+- Plain-text settings (button labels, dismiss link, emoji rain) are written as text, never markup — on top of being sanitized on save.
+- The Spotlight Bar's custom HTML is filtered with the same rules WordPress uses for post content: formatting, links and images kept; scripts and event handlers stripped. Widen via `popcorn_spotlight_allowed_html` at your own risk.
+- Colours are re-validated as hex on output, not just on input.
+
+**Data**
+
+No personal data is collected, stored, or sent anywhere. The cookies hold a count and a timestamp. Uninstalling removes the plugin's own options; your popups are content, so they stay.
+
 ## Notes and limits
 
 - Device targeting is decided in the browser rather than on the server, so a full-page cache can never serve a desktop-only popup to a phone.
