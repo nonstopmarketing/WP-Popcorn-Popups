@@ -3,7 +3,7 @@
  * Plugin Name:       Popcorn Popups
  * Plugin URI:        https://example.com/popcorn-popups
  * Description:       🍿 A ridiculously fun popup builder. Pop things up on pages and posts with wild triggers, silly animations, and actual confetti.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            You
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'POPCORN_VERSION', '1.1.0' );
+define( 'POPCORN_VERSION', '1.2.0' );
 define( 'POPCORN_FILE', __FILE__ );
 define( 'POPCORN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'POPCORN_URL', plugin_dir_url( __FILE__ ) );

@@ -149,6 +149,16 @@ class Popcorn_Fields {
 							'bottom-right' => array( '↘️', __( 'Bottom right', 'popcorn-popups' ), '' ),
 						),
 					),
+					'chrome'        => array(
+						'type'    => 'cards',
+						'label'   => __( 'Frame', 'popcorn-popups' ),
+						'default' => 'card',
+						'columns' => 2,
+						'choices' => array(
+							'card' => array( '🗂️', __( 'Card', 'popcorn-popups' ), __( 'Background, padding, rounded corners, shadow.', 'popcorn-popups' ) ),
+							'bare' => array( '👻', __( 'Bare', 'popcorn-popups' ), __( 'Transparent. No background, border, shadow, margin or padding — just your content and the ✕.', 'popcorn-popups' ) ),
+						),
+					),
 					'corner_offset' => array(
 						'type'    => 'range',
 						'label'   => __( 'Distance from the corner', 'popcorn-popups' ),
@@ -186,11 +196,13 @@ class Popcorn_Fields {
 						'min'     => 0,
 						'max'     => 60,
 						'suffix'  => 'px',
+						'show_if' => array( 'chrome' => array( 'card' ) ),
 					),
 					'bg_color'      => array(
 						'type'    => 'color',
 						'label'   => __( 'Background', 'popcorn-popups' ),
 						'default' => '#fffaf0',
+						'show_if' => array( 'chrome' => array( 'card' ) ),
 					),
 					'text_color'    => array(
 						'type'    => 'color',

@@ -305,6 +305,15 @@ class Popcorn_Meta {
 		<p class="pcp-help" style="margin-top:8px;">
 			<?php esc_html_e( 'The preview ignores triggers and targeting — it just shows the look and the entrance.', 'popcorn-popups' ); ?>
 		</p>
+
+		<hr style="margin:14px 0;">
+
+		<button type="button" class="button pcp-forget-btn" style="width:100%;">
+			<?php esc_html_e( '🍪 Forget me on this device', 'popcorn-popups' ); ?>
+		</button>
+		<p class="pcp-help" style="margin-top:8px;">
+			<?php esc_html_e( 'Clears this browser\'s Popcorn cookies so every popup treats you as a brand new visitor. Useful when a popup will not show again while you are testing.', 'popcorn-popups' ); ?>
+		</p>
 		<?php if ( 'publish' !== $post->post_status ) : ?>
 			<p class="pcp-notice-mini">
 				<?php esc_html_e( 'Heads up: this popup is not published yet, so visitors will not see it.', 'popcorn-popups' ); ?>

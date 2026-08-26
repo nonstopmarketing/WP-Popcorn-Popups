@@ -140,8 +140,10 @@ class Popcorn_Frontend {
 			'freqDays'    => (int) popcorn_get( $id, 'frequency_days' ),
 			'maxShows'    => (int) popcorn_get( $id, 'max_shows' ),
 			'cookieDays'  => (int) popcorn_get( $id, 'cookie_days' ),
+			'rev'         => self::cookie_rev( $id ),
 			'closeDelay'  => (int) popcorn_get( $id, 'close_delay' ),
 			'position'    => popcorn_get( $id, 'position' ),
+			'chrome'      => popcorn_get( $id, 'chrome' ),
 			'offset'      => (int) popcorn_get( $id, 'corner_offset' ),
 			'animation'   => popcorn_get( $id, 'animation' ),
 			'width'       => (int) popcorn_get( $id, 'width' ),
@@ -171,6 +173,32 @@ class Popcorn_Frontend {
 		 * @param WP_Post $popup  Popup post.
 		 */
 		return apply_filters( 'popcorn_popup_config', $config, $popup );
+	}
+
+	/**
+	 * A short stamp of everything that decides how often a popup may show.
+	 *
+	 * It is baked into the visitor's cookie names, so changing any of these
+	 * settings retires the old cookies instead of letting a stale "seen it" or
+	 * "no thanks" quietly outlive the rule that created it. Editing the popup's
+	 * copy or colours deliberately does not reset anyone's count.
+	 *
+	 * @param int $id Popup ID.
+	 * @return string
+	 */
+	public static function cookie_rev( $id ) {
+		$seed = implode(
+			'|',
+			array(
+				popcorn_get( $id, 'frequency' ),
+				(int) popcorn_get( $id, 'frequency_days' ),
+				(int) popcorn_get( $id, 'max_shows' ),
+				(int) popcorn_get( $id, 'cookie_days' ),
+				'' === trim( (string) popcorn_get( $id, 'dismiss_text' ) ) ? '' : 'dismissable',
+			)
+		);
+
+		return substr( md5( $seed ), 0, 6 );
 	}
 
 	/**

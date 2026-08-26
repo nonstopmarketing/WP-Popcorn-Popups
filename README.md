@@ -21,6 +21,15 @@ Each popup is its own little post: write the content in the normal editor, then 
 
 Eight positions (center, top bar, bottom bar, all four corners, full screen), six entrances (pop, slide, fly, flip, jelly wobble, drop), your own colours, corner roundness, and an optional dimmed and blurred backdrop. Corner popups get a "distance from the corner" control.
 
+Two frames:
+
+| | Frame | What you get |
+|---|---|---|
+| 🗂️ | Card | Background, padding, rounded corners, shadow — the normal look |
+| 👻 | Bare | Fully transparent. No background, border, shadow, margin or padding: just your content and the ✕ |
+
+**Bare** is for dropping in an image, a video embed, or your own fully styled blocks with nothing framing them.
+
 ### The fun bits
 
 - 🎉 **Confetti**, fired the moment the popup pops, on the button click, or both
@@ -69,12 +78,18 @@ Counted in first-party cookies on the visitor's own device:
 
 | Cookie | Holds |
 |---|---|
-| `pcp_<id>` | How many times they have seen it, and when they last did |
-| `pcp_s_<id>` | Session marker for "once per session" |
-| `pcp_x_<id>` | Set when they click your "Maybe later" link |
+| `pcp_<id>_<stamp>` | How many times they have seen it, and when they last did |
+| `pcp_s_<id>_<stamp>` | Session marker for "once per session" |
+| `pcp_x_<id>_<stamp>` | Set when they click your "Maybe later" link |
 | `pcp_hello_<hash>` | Set when they close the Hello Bar |
 
+`<stamp>` is a short hash of the popup's frequency settings. **Change how often a popup should show and the old cookies stop counting**, so a stale "seen it" or "no thanks" can never outlive the rule that created it. Editing copy or colours deliberately does not reset anyone's count.
+
+"Every page view" with no lifetime cap writes no cookie at all — there is nothing to count, so nothing is stored.
+
 *Remember visitors for (days)* controls how long those cookies live. When they expire, the visitor is treated as brand new.
+
+Testing a popup and it won't show again? Hit **🍪 Forget me on this device** in the Test Drive box on the popup edit screen.
 
 ### Stats
 

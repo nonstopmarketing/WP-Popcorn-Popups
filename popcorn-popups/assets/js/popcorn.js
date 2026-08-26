@@ -414,6 +414,9 @@
 		if ( c.blur ) {
 			root.classList.add( 'popcorn--blur' );
 		}
+		if ( 'bare' === c.chrome ) {
+			root.classList.add( 'popcorn--bare' );
+		}
 
 		root.style.setProperty( '--pcp-bg', c.bg );
 		root.style.setProperty( '--pcp-text', c.text );
@@ -498,10 +501,16 @@
 	 * permanent "no thanks".
 	 */
 	Popup.prototype.cookieNames = function () {
+		// The names carry a stamp of the popup's frequency settings. Change how
+		// often the popup should show and the old cookies stop counting, so a
+		// stale "seen it" or "no thanks" can never outlive the setting that
+		// created it.
+		var rev = this.config.rev ? '_' + this.config.rev : '';
+
 		return {
-			count: 'pcp_' + this.id,
-			session: 'pcp_s_' + this.id,
-			dismissed: 'pcp_x_' + this.id
+			count: 'pcp_' + this.id + rev,
+			session: 'pcp_s_' + this.id + rev,
+			dismissed: 'pcp_x_' + this.id + rev
 		};
 	};
 
@@ -580,12 +589,18 @@
 			return;
 		}
 
-		var seen = this.record();
-		setCookie( names.count, ( seen.count + 1 ) + '-' + Date.now(), days );
-
 		if ( 'session' === this.config.frequency ) {
 			setCookie( names.session, '1', 0 );
 		}
+
+		// "Every page view" with no lifetime cap reads no counter, so don't
+		// write one. Fewer cookies, and nothing left behind to block it later.
+		if ( 'always' === this.config.frequency && ! ( parseInt( this.config.maxShows, 10 ) || 0 ) ) {
+			return;
+		}
+
+		var seen = this.record();
+		setCookie( names.count, ( seen.count + 1 ) + '-' + Date.now(), days );
 	};
 
 	/**
@@ -593,9 +608,15 @@
 	 */
 	Popup.prototype.forget = function () {
 		var names = this.cookieNames();
+
 		clearCookie( names.count );
 		clearCookie( names.session );
 		clearCookie( names.dismissed );
+
+		// Sweep up cookies left by earlier settings too.
+		clearCookie( 'pcp_' + this.id );
+		clearCookie( 'pcp_s_' + this.id );
+		clearCookie( 'pcp_x_' + this.id );
 	};
 
 	/**

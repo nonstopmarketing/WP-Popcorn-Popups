@@ -79,6 +79,74 @@
 	opacity: 1;
 }
 
+/* --------------------------------------------------- Bare / no frame */
+
+/*
+ * Nothing but the content and the close button: no background, border,
+ * shadow, radius, margin or padding. Made for dropping in an image, a video
+ * embed, or your own fully styled block markup.
+ */
+.popcorn.popcorn--bare .popcorn__box {
+	width: -moz-fit-content;
+	width: fit-content;
+	max-width: min(var(--pcp-width), calc(100% - 32px));
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	overflow: visible;
+}
+
+.popcorn--bare .popcorn__content > * {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.popcorn--bare .popcorn__content img,
+.popcorn--bare .popcorn__content iframe,
+.popcorn--bare .popcorn__content video {
+	display: block;
+	max-width: 100%;
+	height: auto;
+}
+
+/* The ✕ sits just off the corner, on its own disc so it stays visible
+   against whatever the content happens to be. */
+.popcorn--bare .popcorn__close {
+	top: -14px;
+	right: -14px;
+	width: 32px;
+	height: 32px;
+	color: #fff;
+	background: rgba(20, 18, 16, 0.85);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+	opacity: 1;
+}
+
+.popcorn--bare .popcorn__close:hover,
+.popcorn--bare .popcorn__close:focus-visible {
+	background: rgba(20, 18, 16, 1);
+}
+
+.popcorn--bare .popcorn__actions {
+	margin-top: 12px;
+}
+
+.popcorn--bare.popcorn--fullscreen .popcorn__box {
+	width: 100%;
+	max-width: none;
+	padding: 0;
+}
+
+@media (max-width: 600px) {
+	.popcorn--bare .popcorn__close {
+		top: -10px;
+		right: -10px;
+	}
+}
+
 /* ------------------------------------------------------- Positions */
 
 .popcorn--center .popcorn__box {
@@ -425,10 +493,10 @@
 		padding: 24px 20px;
 	}
 
-	.popcorn--top-left .popcorn__box,
-	.popcorn--top-right .popcorn__box,
-	.popcorn--bottom-left .popcorn__box,
-	.popcorn--bottom-right .popcorn__box {
+	.popcorn:not(.popcorn--bare).popcorn--top-left .popcorn__box,
+	.popcorn:not(.popcorn--bare).popcorn--top-right .popcorn__box,
+	.popcorn:not(.popcorn--bare).popcorn--bottom-left .popcorn__box,
+	.popcorn:not(.popcorn--bare).popcorn--bottom-right .popcorn__box {
 		left: 12px;
 		right: 12px;
 		width: auto;

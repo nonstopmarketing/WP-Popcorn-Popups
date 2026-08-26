@@ -308,6 +308,7 @@
 			content: content,
 			trigger: val( 'trigger' ),
 			position: val( 'position' ),
+			chrome: val( 'chrome' ),
 			offset: num( 'corner_offset' ),
 			animation: val( 'animation' ),
 			width: num( 'width' ),
@@ -344,6 +345,37 @@
 		} );
 	}
 
+	/**
+	 * Wipe every Popcorn cookie on this device, so the tester looks brand new
+	 * to every popup and to the Hello Bar.
+	 */
+	function initForget() {
+		var button = document.querySelector( '.pcp-forget-btn' );
+		if ( ! button ) {
+			return;
+		}
+
+		button.addEventListener( 'click', function () {
+			var cleared = 0;
+
+			document.cookie.split( ';' ).forEach( function ( pair ) {
+				var name = pair.split( '=' )[ 0 ].trim();
+				if ( 0 === name.indexOf( 'pcp_' ) ) {
+					document.cookie = name + '=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+					cleared++;
+				}
+			} );
+
+			button.textContent = cleared
+				? '✅ ' + cleared + ' cookie' + ( 1 === cleared ? '' : 's' ) + ' cleared'
+				: '✅ Nothing to clear — you are already new';
+
+			window.setTimeout( function () {
+				button.textContent = '🍪 Forget me on this device';
+			}, 3000 );
+		} );
+	}
+
 	/* -------------------------------------------------------------- boot */
 
 	$( function () {
@@ -351,5 +383,6 @@
 		initInputs();
 		initPickers();
 		initPreview();
+		initForget();
 	} );
 }( window.jQuery ) );

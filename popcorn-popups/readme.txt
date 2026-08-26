@@ -4,7 +4,7 @@ Tags: popup, modal, popups, lightbox, call to action
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,11 @@ Popcorn Popups adds a **Popups** menu to wp-admin where each popup is its own li
 **Design**
 
 Eight positions (center, top/bottom bar, all four corners, full screen), six entrances (pop, slide, fly, flip, jelly wobble, drop), your own colours, corner roundness, optional dimmed and blurred backdrop.
+
+Two frames:
+
+* **Card** — background, padding, rounded corners, shadow. The normal look.
+* **Bare** — fully transparent. No background, border, shadow, margin or padding: just your content and the ✕. Made for dropping in an image, a video embed, or your own fully styled blocks.
 
 **The fun bits**
 
@@ -58,12 +63,18 @@ On top of that, **"stop after this many pops per visitor"** is a lifetime cap. S
 
 All of it is counted in first-party cookies on the visitor's own device:
 
-* `pcp_<id>` — how many times they have seen it and when they last did
-* `pcp_s_<id>` — a session cookie for "once per session"
-* `pcp_x_<id>` — set when they click your "Maybe later" link
+* `pcp_<id>_<stamp>` — how many times they have seen it and when they last did
+* `pcp_s_<id>_<stamp>` — a session cookie for "once per session"
+* `pcp_x_<id>_<stamp>` — set when they click your "Maybe later" link
 * `pcp_hello_<hash>` — set when they close the Hello Bar
 
+The `<stamp>` is a short hash of the popup's frequency settings. Change how often a popup should show and the old cookies stop counting, so a stale "seen it" or "no thanks" can never outlive the rule that created it. Editing copy or colours deliberately does not reset anyone's count.
+
+"Every single page view" with no lifetime cap writes no cookie at all — there is nothing to count, so nothing is stored.
+
 **Remember visitors for (days)** controls how long those cookies live. When they expire the visitor is treated as brand new.
+
+Testing a popup and it will not show again? Hit **🍪 Forget me on this device** in the Test Drive box on the popup edit screen.
 
 **Stats**
 
@@ -125,6 +136,12 @@ PHP action:
 * Respects `prefers-reduced-motion`: animations become a simple fade and the confetti and emoji rain sit it out.
 
 == Changelog ==
+
+= 1.2.0 =
+* Fixed: a popup set to "every single page view" could stop showing for good. Cookie names are now stamped with the popup's frequency settings, so an old "seen it" or "no thanks" cookie can no longer outlive the setting that created it.
+* "Every single page view" with no lifetime cap now writes no cookie at all.
+* New **Bare** frame: transparent background, no border, shadow, margin or padding — just your content and the ✕.
+* New **🍪 Forget me on this device** button on the popup edit screen for clearing your own cookies while testing.
 
 = 1.1.0 =
 * Confetti can now fire the moment a popup opens, on the button click, or both.
