@@ -351,7 +351,7 @@
 
 	/**
 	 * Wipe every Popcorn cookie on this device, so the tester looks brand new
-	 * to every popup and to the Hello Bar.
+	 * to every popup and to the Spotlight Bar.
 	 */
 	function initForget() {
 		var button = document.querySelector( '.pcp-forget-btn' );

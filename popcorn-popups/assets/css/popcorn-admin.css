@@ -500,7 +500,7 @@
 	border-radius: 12px;
 }
 
-/* ---------------------------------------------------- Hello Bar admin */
+/* ----------------------------------------------- Spotlight Bar admin */
 
 .pcp-hb-preview-wrap {
 	position: relative;
@@ -541,7 +541,7 @@
 	color: #1d2327;
 }
 
-.pcp-hellobar-admin .form-table th {
+.pcp-spotlight-admin-legacy .form-table th {
 	width: 180px;
 }
 
@@ -550,4 +550,48 @@
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 6px;
+}
+
+/* --------------------------------------------- Spotlight Bar admin */
+
+.pcp-hb-btnfields {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 14px;
+}
+
+.pcp-hb-btnfields > span {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.pcp-hb-btnfields label {
+	font-size: 12px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.pcp-hb-btnfields .pcp-hb-newtab {
+	padding-bottom: 6px;
+}
+
+.pcp-hb-btnfields .pcp-hb-newtab label {
+	flex-direction: row;
+	font-weight: 400;
+}
+
+.pcp-hb-btnfields .description {
+	flex: 1 0 100%;
+	margin: 0;
+}
+
+.pcp-spotlight-admin .form-table th {
+	width: 180px;
+}
+
+.pcp-hb-mode {
+	padding-left: 8px;
+	border-left: 3px solid var(--pcp-brand-soft);
 }

@@ -4,7 +4,7 @@ Tags: popup, modal, popups, lightbox, call to action
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,9 +40,16 @@ Two frames:
 * 🔊 A little synthesised "pop" on open — no audio file needed
 * 🌧️ Emoji rain: type `🍿🎉✨` into one field and it rains
 
-**Hello Bar**
+**Spotlight Bar**
 
-One global, full-width announcement bar across the whole site, set up under **Popups → 👋 Hello Bar**. Emoji, message with basic HTML, button label and link, top or bottom, stuck to the window or sitting in the page flow, four colours, and an option to push the page down so it never covers your header. Visitors can close it, and it stays closed for as many days as you choose. Edit the message and it comes back for everyone, including people who dismissed the old one.
+One global, full-width announcement bar across the whole site, set up under **Popups → 💡 Spotlight Bar**. Top or bottom, stuck to the window or sitting in the page flow, four colours, and an option to push the page down so it never covers your header.
+
+Two ways to fill it:
+
+* **Built for me** — emoji, a message that accepts HTML (so put as many inline links in it as you like), and up to **two** buttons, each with its own label, link, new-tab setting and look (solid, outline or plain link).
+* **My own HTML** — you write the whole bar. Nothing is wrapped around it, so any number of links, spans or images work exactly as you write them.
+
+When a visitor closes it, you choose what happens next: it comes back on the very next page load, next time they visit, after a number of days, or never again. Editing the wording or the buttons brings it back for everyone, including people who closed the old version. There is a **Show it to me again on this device** button on the settings screen for when you are still setting it up.
 
 **Targeting — pages and posts**
 
@@ -68,7 +75,7 @@ All of it is counted in first-party cookies on the visitor's own device:
 * `pcp_<id>_<stamp>` — how many times they have seen it and when they last did
 * `pcp_s_<id>_<stamp>` — a session cookie for "once per session"
 * `pcp_x_<id>_<stamp>` — set when they click your "Maybe later" link
-* `pcp_hello_<hash>` — set when they close the Hello Bar
+* `pcp_spot_<hash>` — set when they close the Spotlight Bar (skipped entirely when it is set to come back on the next page load)
 
 The `<stamp>` is a short hash of the popup's frequency settings. Change how often a popup should show and the old cookies stop counting, so a stale "seen it" or "no thanks" can never outlive the rule that created it. Editing copy or colours deliberately does not reset anyone's count.
 
@@ -106,7 +113,7 @@ JavaScript API:
 `Popcorn.open( 12 )`
 `Popcorn.close( 12 )`
 `Popcorn.reset( 12 )` — clear this visitor's cookies for one popup, or all of them with no argument
-`PopcornHello.reset()` — bring the Hello Bar back on this device
+`PopcornSpotlight.reset()` — bring the Spotlight Bar back on this device
 
 Events fired on the popup element, and bubbling to `document`:
 
@@ -121,7 +128,9 @@ PHP filters:
 * `popcorn_popup_config` — tweak the JSON handed to the front end
 * `popcorn_popup_content` — filter the rendered popup body
 * `popcorn_confetti_colors` — change the confetti palette in code
-* `popcorn_hellobar_visible` — decide per request whether the Hello Bar shows
+* `popcorn_spotlight_visible` — decide per request whether the Spotlight Bar shows
+* `popcorn_spotlight_allowed_html` — widen the tags allowed in the bar's custom HTML
+* `popcorn_spotlight_html` — filter the bar's custom HTML just before output
 
 PHP action:
 
@@ -132,12 +141,21 @@ PHP action:
 * Device targeting is decided in the browser rather than on the server, so a full-page cache can never serve a desktop-only popup to a phone.
 * Frequency capping and the visitor cap use first-party cookies, so they are per-device and per-browser. Clearing cookies resets the count, and a visitor who blocks cookies sees the popup on every visit.
 * Those cookies are functional rather than tracking cookies — nothing is sent anywhere and no visitor is identified — but if your site shows a cookie notice, this is the sort of thing it should mention.
-* The Hello Bar is printed hidden and revealed by JavaScript, so people who dismissed it never see it flash. That also means it does not appear at all with JavaScript disabled.
+* The Spotlight Bar is printed hidden and revealed by JavaScript, so people who closed it never see it flash. That also means it does not appear at all with JavaScript disabled.
 * The tracking endpoint is public and unauthenticated (it has to work for logged-out visitors). The counters are a rough popularity gauge, not audited analytics — treat them accordingly.
 * One automatic popup shows per page view. Click-triggered popups are exempt, since the visitor asked for those.
 * Respects `prefers-reduced-motion`: animations become a simple fade and the confetti and emoji rain sit it out.
 
 == Changelog ==
+
+= 1.4.0 =
+* The Hello Bar is now the **Spotlight Bar**. Your existing settings carry over automatically.
+* New: choose what happens after a visitor closes the bar — back on the next page load, next visit, after N days, or never again. It used to always be a 30-day cookie with no way to change it or get the bar back.
+* New: a second button, so the bar can offer two different links. Each button has its own label, link, new-tab setting and look: solid, outline or plain link.
+* New: a custom HTML mode where you write the whole bar yourself. Nothing wraps around your markup, so multiple links work as written.
+* New: "Show it to me again on this device" on the settings screen, for clearing your own closed-cookie while setting the bar up.
+* The bar's buttons and links no longer inherit theme hover borders.
+* `PopcornHello.reset()` still works as an alias for `PopcornSpotlight.reset()`.
 
 = 1.3.0 =
 * New border controls: none, solid, dashed, dotted or double, with your own thickness and colour.

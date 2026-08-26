@@ -51,18 +51,35 @@ Six colour palettes — Popcorn, Party, Neon, Gold, Monochrome, or just your acc
 
 All of it stands down under `prefers-reduced-motion`.
 
-### 👋 Hello Bar
+### 💡 Spotlight Bar
 
-One global, full-width announcement bar across the whole site, under **Popups → 👋 Hello Bar**.
+One global, full-width announcement bar across the whole site, under **Popups → 💡 Spotlight Bar**.
 
 - Top or bottom of the window
 - Stuck to the window while scrolling, or sitting in the normal page flow
-- Emoji, message (basic HTML allowed), button label and link, new tab or not
 - Four colours: bar background, bar text, button background, button text
 - Pushes the page down so it never covers your header
-- Visitors can close it; it stays closed for as many days as you choose
-- Editing the message brings it back for everyone, including people who dismissed the old one
 - Live preview right on the settings screen
+
+**Two ways to fill it:**
+
+| Mode | What you get |
+|---|---|
+| Built for me | Emoji, a message that accepts HTML, and up to two buttons |
+| My own HTML | You write the whole bar — nothing is wrapped around your markup |
+
+Each button has its own label, link, new-tab setting, and look — **solid**, **outline**, or **plain link** — so two different calls to action can sit side by side and read differently. The message field accepts HTML too, so inline links in the sentence itself work fine.
+
+**When a visitor closes it**, you pick what happens next:
+
+| Setting | Behaviour |
+|---|---|
+| On the very next page load | Closing hides it for that page view only. No cookie is stored |
+| Next time they visit | Session cookie — gone until the browser closes |
+| After a number of days | Your choice of days |
+| Never | Closed is closed, on that device |
+
+Editing the wording or buttons brings it back for everyone, including people who closed the old version. **Show it to me again on this device** on the settings screen clears your own cookie while you set it up.
 
 ### Targeting — pages and posts
 
@@ -83,7 +100,7 @@ Counted in first-party cookies on the visitor's own device:
 | `pcp_<id>_<stamp>` | How many times they have seen it, and when they last did |
 | `pcp_s_<id>_<stamp>` | Session marker for "once per session" |
 | `pcp_x_<id>_<stamp>` | Set when they click your "Maybe later" link |
-| `pcp_hello_<hash>` | Set when they close the Hello Bar |
+| `pcp_spot_<hash>` | Set when they close the Spotlight Bar (skipped entirely when it reappears on the next page load) |
 
 `<stamp>` is a short hash of the popup's frequency settings. **Change how often a popup should show and the old cookies stop counting**, so a stale "seen it" or "no thanks" can never outlive the rule that created it. Editing copy or colours deliberately does not reset anyone's count.
 
@@ -132,7 +149,7 @@ Popcorn.open( 12 );
 Popcorn.close( 12 );
 Popcorn.reset( 12 );   // clear this visitor's cookies for one popup
 Popcorn.reset();       // ...or for every popup on the page
-PopcornHello.reset();  // bring the Hello Bar back on this device
+PopcornSpotlight.reset();  // bring the Spotlight Bar back on this device
 ```
 
 Events fire on the popup element and bubble to `document`:
@@ -152,7 +169,9 @@ PHP filters:
 | `popcorn_popup_config` | Tweak the JSON handed to the front end |
 | `popcorn_popup_content` | Filter the rendered popup body |
 | `popcorn_confetti_colors` | Change the confetti palette in code |
-| `popcorn_hellobar_visible` | Decide per request whether the Hello Bar shows |
+| `popcorn_spotlight_visible` | Decide per request whether the Spotlight Bar shows |
+| `popcorn_spotlight_allowed_html` | Widen the tags allowed in the bar's custom HTML |
+| `popcorn_spotlight_html` | Filter the bar's custom HTML just before output |
 
 PHP action: `popcorn_tracked`, fired with `( $event, $popup_id, $new_total )`.
 
@@ -161,7 +180,7 @@ PHP action: `popcorn_tracked`, fired with `( $event, $popup_id, $new_total )`.
 - Device targeting is decided in the browser rather than on the server, so a full-page cache can never serve a desktop-only popup to a phone.
 - Frequency capping and the visitor cap use first-party cookies, so they are per-device and per-browser. Clearing cookies resets the count, and a visitor who blocks cookies sees the popup on every visit.
 - Those cookies are functional rather than tracking cookies — nothing is sent anywhere and no visitor is identified — but if your site shows a cookie notice, this is the sort of thing it should mention.
-- The Hello Bar is printed hidden and revealed by JavaScript, so people who dismissed it never see it flash. That also means it does not appear at all with JavaScript disabled.
+- The Spotlight Bar is printed hidden and revealed by JavaScript, so people who closed it never see it flash. That also means it does not appear at all with JavaScript disabled.
 - The tracking endpoint is public and unauthenticated — it has to work for logged-out visitors. The counters are a rough popularity gauge, not audited analytics.
 - One automatic popup shows per page view. Click-triggered popups are exempt, since the visitor asked for those.
 - Uninstalling removes only the plugin's own option. Your popups are content, so they stay in the database.

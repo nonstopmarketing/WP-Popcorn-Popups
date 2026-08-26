@@ -1,0 +1,272 @@
+/**
+ * Popcorn Popups — the global Spotlight Bar.
+ */
+
+.popcorn-spotlight {
+	--pcp-sb-bg: #1f1a17;
+	--pcp-sb-text: #fffaf0;
+	--pcp-sb-btn: #ff5c39;
+	--pcp-sb-btn-ink: #ffffff;
+
+	position: relative;
+	z-index: 999980;
+	box-sizing: border-box;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 12px 48px;
+	font-size: 15px;
+	line-height: 1.4;
+	color: var(--pcp-sb-text);
+	background: var(--pcp-sb-bg);
+	box-shadow: 0 2px 14px -4px rgba(0, 0, 0, 0.35);
+}
+
+.popcorn-spotlight[hidden] {
+	display: none;
+}
+
+/* Stuck to the window. */
+
+.popcorn-spotlight--stuck {
+	position: fixed;
+	left: 0;
+	right: 0;
+}
+
+.popcorn-spotlight--stuck.popcorn-spotlight--top {
+	top: 0;
+}
+
+.popcorn-spotlight--stuck.popcorn-spotlight--bottom {
+	bottom: 0;
+	box-shadow: 0 -2px 14px -4px rgba(0, 0, 0, 0.35);
+}
+
+/* Keep clear of the WordPress admin bar for logged-in users. */
+
+body.admin-bar .popcorn-spotlight--stuck.popcorn-spotlight--top {
+	top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+	body.admin-bar .popcorn-spotlight--stuck.popcorn-spotlight--top {
+		top: 46px;
+	}
+}
+
+/* In the flow rather than floating. */
+
+.popcorn-spotlight--inline {
+	position: relative;
+}
+
+/* --------------------------------------------------------------- Bits */
+
+.popcorn-spotlight__inner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 8px 14px;
+	max-width: 1100px;
+	text-align: center;
+}
+
+.popcorn-spotlight__emoji {
+	font-size: 20px;
+	line-height: 1;
+}
+
+.popcorn-spotlight__msg {
+	margin: 0;
+}
+
+.popcorn-spotlight__msg p {
+	margin: 0;
+	display: inline;
+}
+
+.popcorn-spotlight__msg a {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.popcorn-spotlight__cta {
+	display: inline-block;
+	flex: 0 0 auto;
+	padding: 8px 18px;
+	font-size: 0.9375em;
+	font-weight: 700;
+	line-height: 1.2;
+	text-decoration: none;
+	white-space: nowrap;
+	color: var(--pcp-sb-btn-ink);
+	background: var(--pcp-sb-btn);
+	border-radius: 999px;
+	transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+a.popcorn-spotlight__cta:hover,
+a.popcorn-spotlight__cta:focus-visible {
+	color: var(--pcp-sb-btn-ink);
+	transform: translateY(-1px);
+	filter: brightness(1.08);
+}
+
+/* --------------------------------------------------- Button variants */
+
+.popcorn-spotlight__cta--outline {
+	color: var(--pcp-sb-text);
+	background: transparent;
+	box-shadow: inset 0 0 0 2px currentColor;
+}
+
+a.popcorn-spotlight__cta--outline:hover,
+a.popcorn-spotlight__cta--outline:focus-visible {
+	color: var(--pcp-sb-btn-ink);
+	background: var(--pcp-sb-btn);
+	box-shadow: inset 0 0 0 2px var(--pcp-sb-btn);
+}
+
+.popcorn-spotlight__cta--plain {
+	padding: 4px 2px;
+	color: var(--pcp-sb-text);
+	background: transparent;
+	border-radius: 0;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+a.popcorn-spotlight__cta--plain:hover,
+a.popcorn-spotlight__cta--plain:focus-visible {
+	color: var(--pcp-sb-text);
+	background: transparent;
+	opacity: 0.75;
+}
+
+/*
+ * Themes styling `a:hover` or `button:hover` with a border must not leak in
+ * and paint one on rollover.
+ */
+.popcorn-spotlight a,
+.popcorn-spotlight button,
+.popcorn-spotlight a:hover,
+.popcorn-spotlight button:hover,
+.popcorn-spotlight a:focus,
+.popcorn-spotlight button:focus,
+.popcorn-spotlight a:active,
+.popcorn-spotlight button:active {
+	border: 0;
+	outline: none;
+	text-shadow: none;
+}
+
+.popcorn-spotlight a:focus-visible,
+.popcorn-spotlight button:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}
+
+/* Author-supplied HTML: keep links legible whatever the bar colour is. */
+.popcorn-spotlight__inner a:not(.popcorn-spotlight__cta) {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.popcorn-spotlight__inner a:not(.popcorn-spotlight__cta):hover {
+	opacity: 0.75;
+}
+
+.popcorn-spotlight__inner img {
+	max-width: 100%;
+	height: auto;
+	vertical-align: middle;
+}
+
+.popcorn-spotlight__inner p {
+	margin: 0;
+	display: inline;
+}
+
+.popcorn-spotlight__x {
+	position: absolute;
+	top: 50%;
+	right: 8px;
+	transform: translateY(-50%);
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	font-size: 22px;
+	line-height: 1;
+	color: inherit;
+	background: transparent;
+	border: 0;
+	border-radius: 50%;
+	opacity: 0.6;
+	cursor: pointer;
+	transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.popcorn-spotlight__x:hover,
+.popcorn-spotlight__x:focus-visible {
+	opacity: 1;
+	background: rgba(127, 127, 127, 0.25);
+}
+
+/* ---------------------------------------------------------- Going away */
+
+.popcorn-spotlight.is-leaving {
+	transition: opacity 0.25s ease, transform 0.25s ease;
+	opacity: 0;
+}
+
+.popcorn-spotlight--top.is-leaving {
+	transform: translateY(-100%);
+}
+
+.popcorn-spotlight--bottom.is-leaving {
+	transform: translateY(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.popcorn-spotlight.is-leaving {
+		transition: opacity 0.15s ease;
+		transform: none;
+	}
+}
+
+/* -------------------------------------------------------- Small screens */
+
+@media (max-width: 600px) {
+	.popcorn-spotlight {
+		padding: 10px 40px;
+		font-size: 14px;
+	}
+
+	.popcorn-spotlight__inner {
+		gap: 6px 10px;
+	}
+
+	.popcorn-spotlight__cta {
+		padding: 7px 14px;
+	}
+}
+
+/* ------------------------------------------------- Admin preview only */
+
+.popcorn-spotlight--preview {
+	position: relative;
+	border-radius: 8px;
+	box-shadow: none;
+}
+
+.popcorn-spotlight--preview .popcorn-spotlight__x {
+	cursor: default;
+}
