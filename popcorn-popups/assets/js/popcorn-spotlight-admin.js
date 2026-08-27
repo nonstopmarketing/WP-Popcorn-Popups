@@ -16,9 +16,7 @@
 
 		var parts = {
 			emoji: document.getElementById( 'pcp-hb-p-emoji' ),
-			msg: document.getElementById( 'pcp-hb-p-msg' ),
-			cta: document.getElementById( 'pcp-hb-p-cta' ),
-			cta2: document.getElementById( 'pcp-hb-p-cta2' )
+			msg: document.getElementById( 'pcp-hb-p-msg' )
 		};
 
 		var vars = {
@@ -63,8 +61,6 @@
 		}
 
 		syncText( 'pcp-hb-emoji', parts.emoji );
-		syncText( 'pcp-hb-link-text', parts.cta );
-		syncText( 'pcp-hb-link2-text', parts.cta2 );
 
 		var message = document.getElementById( 'pcp-hb-message' );
 
@@ -90,8 +86,17 @@
 			} );
 		}
 
-		syncStyle( 'pcp-hb-link-style', parts.cta );
-		syncStyle( 'pcp-hb-link2-style', parts.cta2 );
+		// Every button drives its own span in the preview. The spans are read
+		// from the page rather than counted here, so adding a fourth button
+		// server-side needs no change in this file.
+		preview.querySelectorAll( '.popcorn-spotlight__cta' ).forEach( function ( span ) {
+			var n = ( span.id || '' ).replace( 'pcp-hb-p-cta', '' );
+			if ( ! n ) {
+				return;
+			}
+			syncText( 'pcp-hb-btn' + n + '-text', span );
+			syncStyle( 'pcp-hb-btn' + n + '-style', span );
+		} );
 
 		/* ------------------------------------------------------ position */
 

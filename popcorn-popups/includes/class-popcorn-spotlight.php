@@ -74,43 +74,80 @@ class Popcorn_Spotlight {
 	}
 
 	/**
+	 * How many buttons the bar offers.
+	 */
+	const BUTTONS = 3;
+
+	/**
+	 * Setting keys for one button.
+	 *
+	 * The first button keeps the unprefixed names it shipped with, so settings
+	 * saved before there was a second or third button still load.
+	 *
+	 * @param int $n Button number, from 1.
+	 * @return array
+	 */
+	protected static function button_keys( $n ) {
+		if ( 1 === $n ) {
+			return array(
+				'text'    => 'link_text',
+				'url'     => 'link_url',
+				'new_tab' => 'new_tab',
+				'style'   => 'link_style',
+			);
+		}
+
+		return array(
+			'text'    => 'link' . $n . '_text',
+			'url'     => 'link' . $n . '_url',
+			'new_tab' => 'link' . $n . '_new_tab',
+			'style'   => 'link' . $n . '_style',
+		);
+	}
+
+	/**
 	 * Default settings.
 	 *
 	 * @return array
 	 */
 	public static function defaults() {
 		return array(
-			'enabled'      => 0,
-			'position'     => 'top',
-			'sticky'       => 1,
-			'push_page'    => 1,
+			'enabled'       => 0,
+			'position'      => 'top',
+			'sticky'        => 1,
+			'push_page'     => 1,
 
-			'content_mode' => 'simple',
-			'emoji'        => '💡',
-			'message'      => __( 'Something worth shouting about goes here.', 'popcorn-popups' ),
-			'custom_html'  => '',
+			'content_mode'  => 'simple',
+			'emoji'         => '💡',
+			'message'       => __( 'Something worth shouting about goes here.', 'popcorn-popups' ),
+			'custom_html'   => '',
 
-			'link_text'    => __( 'Take a look', 'popcorn-popups' ),
-			'link_url'     => '',
-			'new_tab'      => 0,
-			'link_style'   => 'solid',
+			'link_text'     => __( 'Take a look', 'popcorn-popups' ),
+			'link_url'      => '',
+			'new_tab'       => 0,
+			'link_style'    => 'solid',
 
-			'link2_text'   => '',
-			'link2_url'    => '',
+			'link2_text'    => '',
+			'link2_url'     => '',
 			'link2_new_tab' => 0,
-			'link2_style'  => 'outline',
+			'link2_style'   => 'outline',
 
-			'bg_color'     => '#1f1a17',
-			'text_color'   => '#fffaf0',
-			'btn_bg'       => '#ff5c39',
-			'btn_text'     => '#ffffff',
+			'link3_text'    => '',
+			'link3_url'     => '',
+			'link3_new_tab' => 0,
+			'link3_style'   => 'plain',
 
-			'dismissible'  => 1,
-			'reappear'     => 'days',
-			'dismiss_days' => 30,
+			'bg_color'      => '#1f1a17',
+			'text_color'    => '#fffaf0',
+			'btn_bg'        => '#ff5c39',
+			'btn_text'      => '#ffffff',
 
-			'show_on'      => 'everywhere',
-			'exclude_ids'  => '',
+			'dismissible'   => 1,
+			'reappear'      => 'days',
+			'dismiss_days'  => 30,
+
+			'show_on'       => 'everywhere',
+			'exclude_ids'   => '',
 		);
 	}
 
@@ -176,30 +213,33 @@ class Popcorn_Spotlight {
 			return $clean;
 		}
 
-		foreach ( array( 'enabled', 'sticky', 'push_page', 'new_tab', 'link2_new_tab', 'dismissible' ) as $flag ) {
-			$clean[ $flag ] = empty( $input[ $flag ] ) ? 0 : 1;
-		}
-
+		$flags = array( 'enabled', 'sticky', 'push_page', 'dismissible' );
 		$enums = array(
 			'position'     => array( 'top', 'bottom' ),
 			'content_mode' => array( 'simple', 'html' ),
-			'link_style'   => array( 'solid', 'outline', 'plain' ),
-			'link2_style'  => array( 'solid', 'outline', 'plain' ),
 			'reappear'     => array( 'always', 'session', 'days', 'forever' ),
 			'show_on'      => array( 'everywhere', 'front', 'pages', 'posts' ),
 		);
+
+		for ( $n = 1; $n <= self::BUTTONS; $n++ ) {
+			$keys                    = self::button_keys( $n );
+			$flags[]                 = $keys['new_tab'];
+			$enums[ $keys['style'] ] = array( 'solid', 'outline', 'plain' );
+			$clean[ $keys['text'] ]  = sanitize_text_field( $input[ $keys['text'] ] ?? '' );
+			$clean[ $keys['url'] ]   = esc_url_raw( trim( (string) ( $input[ $keys['url'] ] ?? '' ) ) );
+		}
+
+		foreach ( $flags as $flag ) {
+			$clean[ $flag ] = empty( $input[ $flag ] ) ? 0 : 1;
+		}
 
 		foreach ( $enums as $key => $allowed ) {
 			$value         = isset( $input[ $key ] ) ? $input[ $key ] : '';
 			$clean[ $key ] = in_array( $value, $allowed, true ) ? $value : $defaults[ $key ];
 		}
 
-		$clean['emoji']      = sanitize_text_field( $input['emoji'] ?? '' );
-		$clean['message']    = wp_kses_post( $input['message'] ?? '' );
-		$clean['link_text']  = sanitize_text_field( $input['link_text'] ?? '' );
-		$clean['link_url']   = esc_url_raw( trim( (string) ( $input['link_url'] ?? '' ) ) );
-		$clean['link2_text'] = sanitize_text_field( $input['link2_text'] ?? '' );
-		$clean['link2_url']  = esc_url_raw( trim( (string) ( $input['link2_url'] ?? '' ) ) );
+		$clean['emoji']   = sanitize_text_field( $input['emoji'] ?? '' );
+		$clean['message'] = wp_kses_post( $input['message'] ?? '' );
 
 		/**
 		 * Filter the tags allowed in the Spotlight Bar's custom HTML.
@@ -249,6 +289,75 @@ class Popcorn_Spotlight {
 	}
 
 	/**
+	 * One button's row of settings fields.
+	 *
+	 * @param int    $n    Button number, from 1.
+	 * @param array  $s    Current settings.
+	 * @param string $name Option name, for the field names.
+	 */
+	protected static function button_row( $n, $s, $name ) {
+		$keys = self::button_keys( $n );
+		$id   = 'pcp-hb-btn' . $n;
+
+		$titles = array(
+			1 => __( 'Button one', 'popcorn-popups' ),
+			2 => __( 'Button two', 'popcorn-popups' ),
+			3 => __( 'Button three', 'popcorn-popups' ),
+		);
+
+		$looks = array(
+			'solid'   => __( 'Solid button', 'popcorn-popups' ),
+			'outline' => __( 'Outline button', 'popcorn-popups' ),
+			'plain'   => __( 'Plain link', 'popcorn-popups' ),
+		);
+		?>
+		<tr>
+			<th scope="row">
+				<?php echo esc_html( isset( $titles[ $n ] ) ? $titles[ $n ] : sprintf( /* translators: %d: button number */ __( 'Button %d', 'popcorn-popups' ), $n ) ); ?>
+			</th>
+			<td class="pcp-hb-btnfields" data-button="<?php echo esc_attr( $n ); ?>">
+				<span>
+					<label for="<?php echo esc_attr( $id ); ?>-text"><?php esc_html_e( 'Label', 'popcorn-popups' ); ?></label>
+					<input type="text" id="<?php echo esc_attr( $id ); ?>-text" class="regular-text"
+						name="<?php echo esc_attr( $name ); ?>[<?php echo esc_attr( $keys['text'] ); ?>]"
+						value="<?php echo esc_attr( $s[ $keys['text'] ] ); ?>">
+				</span>
+				<span>
+					<label for="<?php echo esc_attr( $id ); ?>-url"><?php esc_html_e( 'Link', 'popcorn-popups' ); ?></label>
+					<input type="url" id="<?php echo esc_attr( $id ); ?>-url" class="regular-text" placeholder="https://"
+						name="<?php echo esc_attr( $name ); ?>[<?php echo esc_attr( $keys['url'] ); ?>]"
+						value="<?php echo esc_attr( $s[ $keys['url'] ] ); ?>">
+				</span>
+				<span>
+					<label for="<?php echo esc_attr( $id ); ?>-style"><?php esc_html_e( 'Look', 'popcorn-popups' ); ?></label>
+					<select id="<?php echo esc_attr( $id ); ?>-style" name="<?php echo esc_attr( $name ); ?>[<?php echo esc_attr( $keys['style'] ); ?>]">
+						<?php foreach ( $looks as $value => $label ) : ?>
+							<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $s[ $keys['style'] ], $value ); ?>>
+								<?php echo esc_html( $label ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</span>
+				<span class="pcp-hb-newtab">
+					<label>
+						<input type="hidden" name="<?php echo esc_attr( $name ); ?>[<?php echo esc_attr( $keys['new_tab'] ); ?>]" value="0">
+						<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[<?php echo esc_attr( $keys['new_tab'] ); ?>]" value="1" <?php checked( $s[ $keys['new_tab'] ], 1 ); ?>>
+						<?php esc_html_e( 'New tab', 'popcorn-popups' ); ?>
+					</label>
+				</span>
+				<p class="description">
+					<?php
+					echo 1 === $n
+						? esc_html__( 'Leave the label empty to hide this button.', 'popcorn-popups' )
+						: esc_html__( 'Another link, styled however you like. Leave the label empty to hide it.', 'popcorn-popups' );
+					?>
+				</p>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
 	 * The settings screen.
 	 */
 	public static function render_page() {
@@ -272,8 +381,12 @@ class Popcorn_Spotlight {
 					<div class="popcorn-spotlight__inner">
 						<span class="popcorn-spotlight__emoji" id="pcp-hb-p-emoji"><?php echo esc_html( $s['emoji'] ); ?></span>
 						<span class="popcorn-spotlight__msg" id="pcp-hb-p-msg"><?php echo wp_kses_post( $s['message'] ); ?></span>
-						<span class="popcorn-spotlight__cta popcorn-spotlight__cta--<?php echo esc_attr( $s['link_style'] ); ?>" id="pcp-hb-p-cta"><?php echo esc_html( $s['link_text'] ); ?></span>
-						<span class="popcorn-spotlight__cta popcorn-spotlight__cta--<?php echo esc_attr( $s['link2_style'] ); ?>" id="pcp-hb-p-cta2"<?php echo '' === trim( $s['link2_text'] ) ? ' style="display:none"' : ''; ?>><?php echo esc_html( $s['link2_text'] ); ?></span>
+						<?php for ( $n = 1; $n <= self::BUTTONS; $n++ ) : ?>
+							<?php $pk = self::button_keys( $n ); ?>
+							<span class="popcorn-spotlight__cta popcorn-spotlight__cta--<?php echo esc_attr( $s[ $pk['style'] ] ); ?>"
+								id="pcp-hb-p-cta<?php echo esc_attr( $n ); ?>"
+								<?php echo '' === trim( $s[ $pk['text'] ] ) ? ' style="display:none"' : ''; ?>><?php echo esc_html( $s[ $pk['text'] ] ); ?></span>
+						<?php endfor; ?>
 					</div>
 					<button type="button" class="popcorn-spotlight__x" aria-hidden="true" tabindex="-1">&times;</button>
 				</div>
@@ -331,65 +444,11 @@ class Popcorn_Spotlight {
 							</td>
 						</tr>
 
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Button one', 'popcorn-popups' ); ?></th>
-							<td class="pcp-hb-btnfields">
-								<span>
-									<label for="pcp-hb-link-text"><?php esc_html_e( 'Label', 'popcorn-popups' ); ?></label>
-									<input type="text" id="pcp-hb-link-text" class="regular-text" name="<?php echo esc_attr( $name ); ?>[link_text]" value="<?php echo esc_attr( $s['link_text'] ); ?>">
-								</span>
-								<span>
-									<label for="pcp-hb-link-url"><?php esc_html_e( 'Link', 'popcorn-popups' ); ?></label>
-									<input type="url" id="pcp-hb-link-url" class="regular-text" placeholder="https://" name="<?php echo esc_attr( $name ); ?>[link_url]" value="<?php echo esc_attr( $s['link_url'] ); ?>">
-								</span>
-								<span>
-									<label for="pcp-hb-link-style"><?php esc_html_e( 'Look', 'popcorn-popups' ); ?></label>
-									<select id="pcp-hb-link-style" name="<?php echo esc_attr( $name ); ?>[link_style]">
-										<option value="solid" <?php selected( $s['link_style'], 'solid' ); ?>><?php esc_html_e( 'Solid button', 'popcorn-popups' ); ?></option>
-										<option value="outline" <?php selected( $s['link_style'], 'outline' ); ?>><?php esc_html_e( 'Outline button', 'popcorn-popups' ); ?></option>
-										<option value="plain" <?php selected( $s['link_style'], 'plain' ); ?>><?php esc_html_e( 'Plain link', 'popcorn-popups' ); ?></option>
-									</select>
-								</span>
-								<span class="pcp-hb-newtab">
-									<label>
-										<input type="hidden" name="<?php echo esc_attr( $name ); ?>[new_tab]" value="0">
-										<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[new_tab]" value="1" <?php checked( $s['new_tab'], 1 ); ?>>
-										<?php esc_html_e( 'New tab', 'popcorn-popups' ); ?>
-									</label>
-								</span>
-								<p class="description"><?php esc_html_e( 'Leave the label empty to hide this button.', 'popcorn-popups' ); ?></p>
-							</td>
-						</tr>
-
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Button two', 'popcorn-popups' ); ?></th>
-							<td class="pcp-hb-btnfields">
-								<span>
-									<label for="pcp-hb-link2-text"><?php esc_html_e( 'Label', 'popcorn-popups' ); ?></label>
-									<input type="text" id="pcp-hb-link2-text" class="regular-text" name="<?php echo esc_attr( $name ); ?>[link2_text]" value="<?php echo esc_attr( $s['link2_text'] ); ?>">
-								</span>
-								<span>
-									<label for="pcp-hb-link2-url"><?php esc_html_e( 'Link', 'popcorn-popups' ); ?></label>
-									<input type="url" id="pcp-hb-link2-url" class="regular-text" placeholder="https://" name="<?php echo esc_attr( $name ); ?>[link2_url]" value="<?php echo esc_attr( $s['link2_url'] ); ?>">
-								</span>
-								<span>
-									<label for="pcp-hb-link2-style"><?php esc_html_e( 'Look', 'popcorn-popups' ); ?></label>
-									<select id="pcp-hb-link2-style" name="<?php echo esc_attr( $name ); ?>[link2_style]">
-										<option value="solid" <?php selected( $s['link2_style'], 'solid' ); ?>><?php esc_html_e( 'Solid button', 'popcorn-popups' ); ?></option>
-										<option value="outline" <?php selected( $s['link2_style'], 'outline' ); ?>><?php esc_html_e( 'Outline button', 'popcorn-popups' ); ?></option>
-										<option value="plain" <?php selected( $s['link2_style'], 'plain' ); ?>><?php esc_html_e( 'Plain link', 'popcorn-popups' ); ?></option>
-									</select>
-								</span>
-								<span class="pcp-hb-newtab">
-									<label>
-										<input type="hidden" name="<?php echo esc_attr( $name ); ?>[link2_new_tab]" value="0">
-										<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[link2_new_tab]" value="1" <?php checked( $s['link2_new_tab'], 1 ); ?>>
-										<?php esc_html_e( 'New tab', 'popcorn-popups' ); ?>
-									</label>
-								</span>
-								<p class="description"><?php esc_html_e( 'A second, different link. Leave the label empty to hide it.', 'popcorn-popups' ); ?></p>
-							</td>
-						</tr>
+						<?php
+						for ( $n = 1; $n <= self::BUTTONS; $n++ ) {
+							self::button_row( $n, $s, $name );
+						}
+						?>
 					</table>
 				</div>
 
@@ -587,9 +646,35 @@ class Popcorn_Spotlight {
 			return '' !== trim( wp_strip_all_tags( $s['custom_html'] ) ) || false !== strpos( $s['custom_html'], '<img' );
 		}
 
-		return '' !== trim( wp_strip_all_tags( $s['message'] ) )
-			|| '' !== trim( $s['link_text'] )
-			|| '' !== trim( $s['link2_text'] );
+		if ( '' !== trim( wp_strip_all_tags( $s['message'] ) ) ) {
+			return true;
+		}
+
+		for ( $n = 1; $n <= self::BUTTONS; $n++ ) {
+			$keys = self::button_keys( $n );
+			if ( '' !== trim( $s[ $keys['text'] ] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Every button's label and link, flattened, for the version hash.
+	 *
+	 * @param array $s Settings.
+	 * @return string
+	 */
+	protected static function button_seed( $s ) {
+		$parts = array();
+
+		for ( $n = 1; $n <= self::BUTTONS; $n++ ) {
+			$keys    = self::button_keys( $n );
+			$parts[] = $s[ $keys['text'] ] . '>' . $s[ $keys['url'] ];
+		}
+
+		return implode( ',', $parts );
 	}
 
 	/**
@@ -609,10 +694,7 @@ class Popcorn_Spotlight {
 				$s['emoji'],
 				$s['message'],
 				$s['custom_html'],
-				$s['link_text'],
-				$s['link_url'],
-				$s['link2_text'],
-				$s['link2_url'],
+				self::button_seed( $s ),
 				$s['reappear'],
 				(int) $s['dismiss_days'],
 			)
@@ -753,8 +835,10 @@ class Popcorn_Spotlight {
 					<span class="popcorn-spotlight__msg"><?php echo wp_kses_post( $s['message'] ); ?></span>
 
 					<?php
-					self::button( $s['link_text'], $s['link_url'], (bool) $s['new_tab'], $s['link_style'] );
-					self::button( $s['link2_text'], $s['link2_url'], (bool) $s['link2_new_tab'], $s['link2_style'] );
+					for ( $n = 1; $n <= self::BUTTONS; $n++ ) {
+						$keys = self::button_keys( $n );
+						self::button( $s[ $keys['text'] ], $s[ $keys['url'] ], (bool) $s[ $keys['new_tab'] ], $s[ $keys['style'] ] );
+					}
 					?>
 				<?php endif; ?>
 			</div>

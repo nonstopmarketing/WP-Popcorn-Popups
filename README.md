@@ -65,10 +65,10 @@ One global, full-width announcement bar across the whole site, under **Popups �
 
 | Mode | What you get |
 |---|---|
-| Built for me | Emoji, a message that accepts HTML, and up to two buttons |
+| Built for me | Emoji, a message that accepts HTML, and up to three buttons |
 | My own HTML | You write the whole bar — nothing is wrapped around your markup |
 
-Each button has its own label, link, new-tab setting, and look — **solid**, **outline**, or **plain link** — so two different calls to action can sit side by side and read differently. The message field accepts HTML too, so inline links in the sentence itself work fine.
+Each of the three buttons has its own label, link, new-tab setting, and look — **solid**, **outline**, or **plain link** — so several calls to action can sit side by side and read differently. Leave a label empty to hide that button. The message field accepts HTML too, so inline links in the sentence itself work fine.
 
 **When a visitor closes it**, you pick what happens next:
 

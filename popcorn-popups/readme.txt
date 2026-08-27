@@ -4,7 +4,7 @@ Tags: popup, modal, popups, lightbox, call to action
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.4.1
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,7 +46,7 @@ One global, full-width announcement bar across the whole site, set up under **Po
 
 Two ways to fill it:
 
-* **Built for me** — emoji, a message that accepts HTML (so put as many inline links in it as you like), and up to **two** buttons, each with its own label, link, new-tab setting and look (solid, outline or plain link).
+* **Built for me** — emoji, a message that accepts HTML (so put as many inline links in it as you like), and up to **three** buttons, each with its own label, link, new-tab setting and look (solid, outline or plain link).
 * **My own HTML** — you write the whole bar. Nothing is wrapped around it, so any number of links, spans or images work exactly as you write them.
 
 When a visitor closes it, you choose what happens next: it comes back on the very next page load, next time they visit, after a number of days, or never again. Editing the wording or the buttons brings it back for everyone, including people who closed the old version. There is a **Show it to me again on this device** button on the settings screen for when you are still setting it up.
@@ -183,6 +183,10 @@ The worst a determined caller can do is make the numbers on the Scoreboard wrong
 * Respects `prefers-reduced-motion`: animations become a simple fade and the confetti and emoji rain sit it out.
 
 == Changelog ==
+
+= 1.5.0 =
+* The Spotlight Bar now offers a third button. Each one still has its own label, link, new-tab setting and look.
+* Button settings are generated from one definition rather than repeated per button, so the settings screen, the preview, the saved values and the bar itself can never drift apart.
 
 = 1.4.1 =
 * Security: the public tracking endpoint is now rate limited per IP address, so it cannot be used to flood the database with writes. Adjustable with the `popcorn_track_rate_limit` filter.
